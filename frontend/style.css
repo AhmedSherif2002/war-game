@@ -1,0 +1,39 @@
+*{
+    /* margin: 100px; */
+    /* overflow: hidden; */
+}
+
+.camera{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1600px;
+    height: 700px;
+    transform: translate(-50%,-50%);
+    /* border: 2px solid red; */
+    overflow: hidden;
+    background-color:#064273;
+    background-color: #000;
+}
+
+.canvas{
+    border: 1px solid #000;
+    position: relative;
+    background-color: rgb(97, 215, 97);
+    /* background-color: #005c0b; */
+    /* background-color: #497c51; */
+    /* rotate: 180deg; */
+    /* top: 50%; */
+    /* left: 50%; */
+    /* transform: translate(-200px,-675px); */
+
+}
+
+.minimap{
+    /* width: 300px; */
+    /* height: 220px; */
+    background-color: rgb(97, 215, 97);
+    position: absolute;
+    right: 10px;
+    opacity: 0.9;
+}
