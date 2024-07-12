@@ -1,6 +1,41 @@
-import Player from "./classes/Player.js"
+import MainPlayer from "./classes/MainPlayer.js"
 import Map from "./classes/Map.js";
 import BulletsController from "./classes/BulletsController.mjs";
+import Player from "./classes/Player.js";
+
+const socket = io("http://localhost:4000/");
+setTimeout(()=>{
+    console.log(socket)
+},1000)
+let player1;
+// let players = [];
+let players = {}
+
+// when the player connects (get the id and info)
+socket.on("playerConnect",(id)=>{
+    console.log(id)
+    player1 = new MainPlayer(id,posX,posY,canvas,mapObstacles,1,ctx,bulletsController,socket)
+    socket.emit("info", {id: id, name: "player 1", position: {x: posX, y: posY}});
+})
+
+// when a new player connects (update the players)
+socket.on("newPlayerConnects",(serverPlayers)=>{
+    for(let playerId in serverPlayers){
+        const player = new Player(playerId, serverPlayers[playerId].position.x, serverPlayers[playerId].position.y, 100, serverPlayers[playerId].team,ctx)
+        players[playerId] = player;
+        // players.push(playerId)
+        console.log(players)
+    }
+})
+
+setInterval(()=>{
+    // request players states from server
+    socket.emit("requestPlayers", (serverPlayers)=>{
+        for(let playerID in serverPlayers){
+            players[playerID].update(2000,2200,serverPlayers[playerID].health,serverPlayers[playerID].degree,serverPlayers[playerID].speed,ctx)
+        }
+    })
+},100)
 
 const canvas = document.getElementById("canvas");
 const miniMapCanvas = document.getElementById("minimap")
@@ -387,6 +422,7 @@ let mapObstacles = [  // map obstacles
     },
 ]
 
+
 // minimap setup
 miniMapCanvas.width = width / 16;
 miniMapCanvas.width = height / 16;
@@ -396,12 +432,11 @@ const miniMap = new Map(1/16,miniCtx)
 canvas.style.transform = `translate(${-(posX-camWidth/2)}px,${-(posY-camHeight/2)}px)`;
 // classes
 const bulletsController = new BulletsController(1,ctx,mapObstacles)
-const player1 = new Player(posX,posY,canvas,mapObstacles,1,ctx,bulletsController)
+// const player1 = new MainPlayer(posX,posY,canvas,mapObstacles,1,ctx,bulletsController)
 const mainMap = new Map(1,ctx);
 
 const update = ()=>{
     requestAnimationFrame(update)
-    // console.log("aa")
     ctx.clearRect(0,0,width*1,height*1) // clear the canvas for rerender
     miniCtx.clearRect(0,0,width*16,height*16) // clear the canvas for rerender
     mainMap.render(ctx,fighterImage,tank,rifle)
@@ -409,184 +444,145 @@ const update = ()=>{
     player1.move(ctx);
     player1.draw(miniCtx)
     bulletsController.drawBullets()
+    // updatePlayers()
 }
 
-const render = ()=>{ // to render the map    
-    // Make the map divs
-    for(let i=0;i<mapObstacles.length;i++){
-        ctx.fillStyle = "yellow";
-        ctx.fillStyle = "#554840";
-        ctx.fillStyle = "#98a163";
-        ctx.globalAlpha = mapObstacles[i].alpha || 1
-        ctx.shadowColor = "rgb(100,100,100)";
-        ctx.shadowColor = "#696969";
-        ctx.shadowOffsetX = 10;
-        ctx.shadowOffsetY = 10;
-        ctx.fillRect(mapObstacles[i].x,mapObstacles[i].y,mapObstacles[i].width,mapObstacles[i].height)
-    }
-    // Make map elements
-    for(let i=0;i<mapElements.length;i++){
-        ctx.shadowOffsetX = 0
-        ctx.shadowOffsetY = 0
-        ctx.globalAlpha = 1
-        if(mapElements[i].shape === "circle"){
-            ctx.fillStyle = mapElements[i].color;
-            ctx.beginPath()
-            ctx.arc(mapElements[i].x,mapElements[i].y,mapElements[i].radius,0,2 * Math.PI);
-            ctx.fill()
-            let repeatValue = mapElements[i].repeat;
-            while(repeatValue !== 0){
-                console.log(mapElements[i].repeat)
-                if(mapElements[i].repeatDir === "x"){
-                    ctx.arc(mapElements[i].x,mapElements[i].y,mapElements[i].radius,0,2 * Math.PI);
-                    ctx.fill()
-                }else{
-                    ctx.arc(mapElements[i].x,mapElements[i].y,mapElements[i].radius,0,2 * Math.PI);
-                    ctx.fill()
-                }
-                repeatValue--;
-            }
-        }else if(mapElements[i].shape === "rectangle"){
-            ctx.fillStyle = mapElements[i].color;
-            ctx.fillRect(mapElements[i].x,mapElements[i].y,mapElements[i].width,mapElements[i].height);
-            let repeatValue = mapElements[i].repeat;
-            while(repeatValue !== 0){
-                ctx.fillStyle = mapElements[i].color;
-                if(mapElements[i].repeatDir === "x"){
-                    ctx.fillRect(mapElements[i].x+(mapElements[i].width+mapElements[i].distance)*repeatValue,mapElements[i].y,mapElements[i].width,mapElements[i].height)
-                }else{
-                    ctx.fillRect(mapElements[i].x,mapElements[i].y+(mapElements[i].height+mapElements[i].distance)*repeatValue,mapElements[i].width,mapElements[i].height)
-                }
-                repeatValue--;
-            }
-        }
-        else{
-            ctx.strokeStyle = mapElements[i].color;
-            ctx.lineWidth = "10"
-            ctx.beginPath();
-            ctx.arc(mapElements[i].x, mapElements[i].y, mapElements[i].radius, 0, 2*Math.PI)
-            ctx.stroke();
-            let repeatValue = mapElements[i].repeat;
-            while(repeatValue !== 0){
-                console.log(mapElements[i].repeat)
-                if(mapElements[i].repeatDir === "x"){
-                    // ctx.fillRect(mapElements[i].x+(mapElements[i].width+mapElements[i].distance)*repeatValue,mapElements[i].y,mapElements[i].width,mapElements[i].height)
-                }else{
-                    // ctx.fillRect(mapElements[i].x,mapElements[i].y+(mapElements[i].height+mapElements[i].distance)*repeatValue,mapElements[i].width,mapElements[i].height)
-                }
-                repeatValue--;
-            }
-        }
-    }
-    // Make the player
-    // playerCtx.fillStyle = "red"
-    // playerCtx.beginPath()
-    // playerCtx.arc(posX,posY,playerRadius,0,2 * Math.PI);
-    // playerCtx.fill()
-    // playerCtx.closePath()
 
-    // Add Images
-    ctx.drawImage(fighterImage,3200,150,270,210)
-    ctx.drawImage(fighterImage,2950,150,270,210)
-    ctx.drawImage(tank,2740,3650,240,180)
-    ctx.drawImage(tank,2140,3650,240,180)
-
-    // Add tergeting line
-    // rifleCtx.save()
-    // rifleCtx.beginPath()
-    // rifleCtx.translate(posX, posY);
-    // rifleCtx.strokeStyle = "rgb(158,154,117)"
-    // rifleCtx.strokeStyle = "#70899D"
-    // rifleCtx.strokeStyle = "#3E372C"
-    // // rifleCtx.strokeStyle = "red"
-    // // rifleCtx.setLineDash([10]);
-    // // rifleCtx.setLine();
-    // rifleCtx.lineWidth = 10
-    // rifleCtx.rotate(degree)
-    // rifleCtx.moveTo(0, 0);
-    // rifleCtx.lineTo(80, 0);
-    // rifleCtx.stroke()
-    // rifleCtx.restore()
-
-    // aiming
-    if(aim){
-        console.log("Aiming")
-        rifleCtx.save()
-        rifleCtx.beginPath()
-        rifleCtx.translate(posX, posY);
-        // rifleCtx.strokeStyle = "rgb(158,154,117)"
-        rifleCtx.strokeStyle = "#AF9B60"
-        rifleCtx.setLineDash([10]);
-        rifleCtx.lineWidth = 2
-        rifleCtx.rotate(degree)
-        rifleCtx.moveTo(80, 0);
-        rifleCtx.lineTo(1000, 0);
-        rifleCtx.stroke()
-        rifleCtx.restore()
+const updatePlayers = ()=>{
+    // draw the players
+    for(let playerID in players){
+        if(playerID === player1.id) continue
+        // players[playerID].darw(ctx)
+        players[playerID].update(2000,2200,players[playerID].health,players[playerID].degree,players[playerID].speed,ctx)
     }
-
-    // Shooting
-    if(shoot){
-    for(let bullet of bullets){
-        // console.log(bullet)
-        ctx.beginPath()
-        ctx.fillStyle = "yellow"
-        ctx.arc(bullet.x, bullet.y, 4, 0, 2 * Math.PI)
-        ctx.fill()
-    }
-    }
-
 }
 
-rifle.onload = () =>{
-    update()
-    console.log("loaded")
-}
-fighterImage.src = "./images/fighter jet.png"
-tank.src = "./images/tank.png"
-rifle.src = "./images/weapon.png"
+update()
 
 
 
-// const shootingHandle = ()=>{ 
-//     bullets.push({
-//         x: posX,
-//         y: posY,
-//         dir: Math.tan(degree),  
-//         dmg: 100
-//     });
-// }
-
-// const flyBullets = ()=>{
-//     // for(let i = 0;i<bullets.length;i++){
-//     for(let bullet of bullets){
-//         // const bullet = bullets[i];
-//         const canvasX = canvas.getBoundingClientRect().x
-//         const canvasY = canvas.getBoundingClientRect().y
-//         // check out of bounds
-//         if((canvasX + bullet.x-4 <= 0) || (canvasY + bullet.y+4 >= height) || (canvasX + bullet.x+4 >= width) || (canvasY + bullet.y-4 <= 0)){
-//             console.log("bullet hit")
-//             bullets.shift()
-//         }
-//         // Check bullet collision
-//         for(let i=0;i<mapObstacles.length;i++){
-//             const obstacle = mapObstacles[i];
-//             const obstacleX = canvasX + obstacle.x;
-//             const obstacleY = canvasY + obstacle.y;
-//             if(obstacle.alpha) continue;
-//             if(
-//                 canvasX + bullet.x+4 >= obstacleX 
-//                 && canvasX + bullet.x-4 <= obstacleX+obstacle.width 
-//                 && canvasY + bullet.y+4 >= obstacleY 
-//                 && canvasY + bullet.y-4 <= obstacleY+obstacle.height
-//             ){
-//                 console.log("bullet hit")
-//                 bullets.shift() 
+// const render = ()=>{ // to render the map    
+//     // Make the map divs
+//     for(let i=0;i<mapObstacles.length;i++){
+//         ctx.fillStyle = "yellow";
+//         ctx.fillStyle = "#554840";
+//         ctx.fillStyle = "#98a163";
+//         ctx.globalAlpha = mapObstacles[i].alpha || 1
+//         ctx.shadowColor = "rgb(100,100,100)";
+//         ctx.shadowColor = "#696969";
+//         ctx.shadowOffsetX = 10;
+//         ctx.shadowOffsetY = 10;
+//         ctx.fillRect(mapObstacles[i].x,mapObstacles[i].y,mapObstacles[i].width,mapObstacles[i].height)
+//     }
+//     // Make map elements
+//     for(let i=0;i<mapElements.length;i++){
+//         ctx.shadowOffsetX = 0
+//         ctx.shadowOffsetY = 0
+//         ctx.globalAlpha = 1
+//         if(mapElements[i].shape === "circle"){
+//             ctx.fillStyle = mapElements[i].color;
+//             ctx.beginPath()
+//             ctx.arc(mapElements[i].x,mapElements[i].y,mapElements[i].radius,0,2 * Math.PI);
+//             ctx.fill()
+//             let repeatValue = mapElements[i].repeat;
+//             while(repeatValue !== 0){
+//                 console.log(mapElements[i].repeat)
+//                 if(mapElements[i].repeatDir === "x"){
+//                     ctx.arc(mapElements[i].x,mapElements[i].y,mapElements[i].radius,0,2 * Math.PI);
+//                     ctx.fill()
+//                 }else{
+//                     ctx.arc(mapElements[i].x,mapElements[i].y,mapElements[i].radius,0,2 * Math.PI);
+//                     ctx.fill()
+//                 }
+//                 repeatValue--;
+//             }
+//         }else if(mapElements[i].shape === "rectangle"){
+//             ctx.fillStyle = mapElements[i].color;
+//             ctx.fillRect(mapElements[i].x,mapElements[i].y,mapElements[i].width,mapElements[i].height);
+//             let repeatValue = mapElements[i].repeat;
+//             while(repeatValue !== 0){
+//                 ctx.fillStyle = mapElements[i].color;
+//                 if(mapElements[i].repeatDir === "x"){
+//                     ctx.fillRect(mapElements[i].x+(mapElements[i].width+mapElements[i].distance)*repeatValue,mapElements[i].y,mapElements[i].width,mapElements[i].height)
+//                 }else{
+//                     ctx.fillRect(mapElements[i].x,mapElements[i].y+(mapElements[i].height+mapElements[i].distance)*repeatValue,mapElements[i].width,mapElements[i].height)
+//                 }
+//                 repeatValue--;
 //             }
 //         }
-//         bullet.y += bullet.dir*(10)
-//         bullet.x += 10
+//         else{
+//             ctx.strokeStyle = mapElements[i].color;
+//             ctx.lineWidth = "10"
+//             ctx.beginPath();
+//             ctx.arc(mapElements[i].x, mapElements[i].y, mapElements[i].radius, 0, 2*Math.PI)
+//             ctx.stroke();
+//             let repeatValue = mapElements[i].repeat;
+//             while(repeatValue !== 0){
+//                 console.log(mapElements[i].repeat)
+//                 if(mapElements[i].repeatDir === "x"){
+//                     // ctx.fillRect(mapElements[i].x+(mapElements[i].width+mapElements[i].distance)*repeatValue,mapElements[i].y,mapElements[i].width,mapElements[i].height)
+//                 }else{
+//                     // ctx.fillRect(mapElements[i].x,mapElements[i].y+(mapElements[i].height+mapElements[i].distance)*repeatValue,mapElements[i].width,mapElements[i].height)
+//                 }
+//                 repeatValue--;
+//             }
+//         }
+//     }
+//     // Make the player
+//     // playerCtx.fillStyle = "red"
+//     // playerCtx.beginPath()
+//     // playerCtx.arc(posX,posY,playerRadius,0,2 * Math.PI);
+//     // playerCtx.fill()
+//     // playerCtx.closePath()
+
+//     // Add Images
+//     ctx.drawImage(fighterImage,3200,150,270,210)
+//     ctx.drawImage(fighterImage,2950,150,270,210)
+//     ctx.drawImage(tank,2740,3650,240,180)
+//     ctx.drawImage(tank,2140,3650,240,180)
+
+//     // Add tergeting line
+//     // rifleCtx.save()
+//     // rifleCtx.beginPath()
+//     // rifleCtx.translate(posX, posY);
+//     // rifleCtx.strokeStyle = "rgb(158,154,117)"
+//     // rifleCtx.strokeStyle = "#70899D"
+//     // rifleCtx.strokeStyle = "#3E372C"
+//     // // rifleCtx.strokeStyle = "red"
+//     // // rifleCtx.setLineDash([10]);
+//     // // rifleCtx.setLine();
+//     // rifleCtx.lineWidth = 10
+//     // rifleCtx.rotate(degree)
+//     // rifleCtx.moveTo(0, 0);
+//     // rifleCtx.lineTo(80, 0);
+//     // rifleCtx.stroke()
+//     // rifleCtx.restore()
+
+//     // aiming
+//     if(aim){
+//         console.log("Aiming")
+//         rifleCtx.save()
+//         rifleCtx.beginPath()
+//         rifleCtx.translate(posX, posY);
+//         // rifleCtx.strokeStyle = "rgb(158,154,117)"
+//         rifleCtx.strokeStyle = "#AF9B60"
+//         rifleCtx.setLineDash([10]);
+//         rifleCtx.lineWidth = 2
+//         rifleCtx.rotate(degree)
+//         rifleCtx.moveTo(80, 0);
+//         rifleCtx.lineTo(1000, 0);
+//         rifleCtx.stroke()
+//         rifleCtx.restore()
+//     }
+
+//     // Shooting
+//     if(shoot){
+//     for(let bullet of bullets){
+//         // console.log(bullet)
+//         ctx.beginPath()
+//         ctx.fillStyle = "yellow"
+//         ctx.arc(bullet.x, bullet.y, 4, 0, 2 * Math.PI)
+//         ctx.fill()
+//     }
 //     }
 // }
-
-// setInterval(flyBullets,2)
