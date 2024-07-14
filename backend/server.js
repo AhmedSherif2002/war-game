@@ -30,16 +30,30 @@ io.on("connection",(socket)=>{
     players[socket.id].id = counter++;
     io.to(socket.id).emit("playerConnect", socket.id) // Send the id back to the player
     // recieve player info
-    socket.on("info",(player)=>{
+    socket.on("info",(player, cb)=>{
         console.log(player.id,player.name)
         players[player.id].name = player.name;
-        players[player.id].health = 100;
-        players[player.id].degree = 0;
+        players[player.id].health = player.health =100;
+        players[player.id].degree = player.speed = 0;
         players[player.id].position = player.position;
-        players[player.id].team = 1;
-        players[player.id].speed = 8;
-        socket.emit("newPlayerConnects",players)
+        players[player.id].team = player.team = 1;
+        players[player.id].speed = player.speed = 8;
+        cb(players)
+        console.log(player)
+        socket.broadcast.emit("newPlayerConnects", player);
         console.log(players)
+    })
+    // update player position
+    socket.on("updateLocation", (playerLocation)=>{
+        console.log("player has moved")
+        players[playerLocation["id"]].position = playerLocation.position;
+        socket.broadcast.emit("updatePlayerState", {id: playerLocation["id"], position: playerLocation.position});
+    })
+    // update player degree
+    socket.on("updateDegree", (playerDegree)=>{
+        console.log("player has moved")
+        players[playerDegree["id"]].degree = playerDegree.position;
+        socket.broadcast.emit("updatePlayerDegree", {id: playerDegree["id"], degree: playerDegree.degree});
     })
     // Send players to the frontend
     socket.on("requestPlayers",(cb)=>{

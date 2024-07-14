@@ -8,34 +8,40 @@ setTimeout(()=>{
     console.log(socket)
 },1000)
 let player1;
-// let players = [];
 let players = {}
 
-// when the player connects (get the id and info)
+// when the player connects (get the id, send info to the server, retrieve other players data)
 socket.on("playerConnect",(id)=>{
     console.log(id)
     player1 = new MainPlayer(id,posX,posY,canvas,mapObstacles,1,ctx,bulletsController,socket)
-    socket.emit("info", {id: id, name: "player 1", position: {x: posX, y: posY}});
-})
-
-// when a new player connects (update the players)
-socket.on("newPlayerConnects",(serverPlayers)=>{
-    for(let playerId in serverPlayers){
-        const player = new Player(playerId, serverPlayers[playerId].position.x, serverPlayers[playerId].position.y, 100, serverPlayers[playerId].team,ctx)
-        players[playerId] = player;
-        // players.push(playerId)
-        console.log(players)
-    }
-})
-
-setInterval(()=>{
-    // request players states from server
-    socket.emit("requestPlayers", (serverPlayers)=>{
-        for(let playerID in serverPlayers){
-            players[playerID].update(2000,2200,serverPlayers[playerID].health,serverPlayers[playerID].degree,serverPlayers[playerID].speed,ctx)
+    socket.emit("info", {id: id, name: "player 1", position: {x: posX, y: posY}}, (serverPlayers)=>{
+        console.log("new player");
+        // clearInterval(updatePlayersInt)
+        for(let playerId in serverPlayers){
+            const player = new Player(playerId, serverPlayers[playerId].position.x, serverPlayers[playerId].position.y, 100, serverPlayers[playerId].team,ctx)
+            players[playerId] = player;
+            // players.push(playerId)
         }
-    })
-},100)
+        console.log(players)
+    });
+})
+
+socket.on("newPlayerConnects", (player)=>{
+    console.log(player.id,player);
+    const newPlayer = new Player(player.id, player.position.x, player.position.y, 100, player.team, ctx)
+    players[player.id] = newPlayer;
+})
+
+socket.on("updatePlayerState",(player)=>{ // when any player on the server state changes
+    console.log("updating players now")
+    players[player.id].x = player.position.x
+    players[player.id].y = player.position.y
+})
+
+socket.on("updatePlayerDegree",(player)=>{ // when any player on the server state changes
+    console.log("updating players now")
+    players[player.id].degree = player.degree
+})
 
 const canvas = document.getElementById("canvas");
 const miniMapCanvas = document.getElementById("minimap")
@@ -444,22 +450,19 @@ const update = ()=>{
     player1.move(ctx);
     player1.draw(miniCtx)
     bulletsController.drawBullets()
-    // updatePlayers()
+    updatePlayers()
 }
-
 
 const updatePlayers = ()=>{
     // draw the players
     for(let playerID in players){
         if(playerID === player1.id) continue
         // players[playerID].darw(ctx)
-        players[playerID].update(2000,2200,players[playerID].health,players[playerID].degree,players[playerID].speed,ctx)
+        players[playerID].update(players[playerID].x,players[playerID].y,players[playerID].health,players[playerID].degree,players[playerID].speed,ctx)
     }
 }
 
 update()
-
-
 
 // const render = ()=>{ // to render the map    
 //     // Make the map divs

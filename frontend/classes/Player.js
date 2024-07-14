@@ -42,8 +42,13 @@ export default class Player{
         ctx.strokeStyle = "rgb(158,154,117)"
         ctx.strokeStyle = "#70899D"
         ctx.strokeStyle = "#3E372C"
-        ctx.lineWidth = 10
+        ctx.lineWidth = 7
         ctx.rotate(this.degree)
+        // ctx.rotate(0)
+        ctx.moveTo(0, 0);
+        ctx.lineTo(80, 0);
+        ctx.stroke()
+        ctx.closePath()
         ctx.restore()
     }
 }

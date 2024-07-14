@@ -27,8 +27,8 @@ export default class MainPlayer{
         this.scale = scale
         this.mapObstacles = obstacles
         this.bulletsController = bulletsController
-        this.listenForEvents()
         this.socket = socket
+        this.listenForEvents()
         console.log(canvas.width)
     }
 
@@ -90,42 +90,58 @@ export default class MainPlayer{
             this.y -= Math.sqrt((this.speed**2)/2);
             this.left += -Math.sqrt((this.speed**2)/2);
             this.top += Math.sqrt((this.speed**2)/2)
+            this.updateLocation()
         }else if(this.keys['w'] == true && this.keys['a'] == true && !this.isHitByObstacle["right"] && !this.isHitByObstacle["below"] && !(this.x-this.radius <= 0) && !(this.y-this.radius <= 0)){
             this.x -= Math.sqrt((this.speed**2)/2);
             this.y -= Math.sqrt((this.speed**2)/2);
             this.left += Math.sqrt((this.speed**2)/2)
             this.top += Math.sqrt((this.speed**2)/2)
+            this.updateLocation()
         }else if(this.keys['s'] == true && this.keys['d'] == true && !this.isHitByObstacle["left"] && !this.isHitByObstacle["above"] && !(this.x+this.radius >= this.canvas.width*this.scale) && !(this.y+this.radius >= this.canvas.height*this.scale)){
             this.x += Math.sqrt((this.speed**2)/2);
             this.y += Math.sqrt((this.speed**2)/2);
             this.left += -Math.sqrt((this.speed**2)/2);
             this.top += -Math.sqrt((this.speed**2)/2);
+            this.updateLocation()
         }else if(this.keys['s'] == true && this.keys['a'] == true && !this.isHitByObstacle["right"] && !this.isHitByObstacle["above"] && !(this.x-this.radius <= 0) && !(this.y+this.radius >= this.canvas.height*this.scale)){
             this.x -= Math.sqrt((this.speed**2)/2);
             this.y += Math.sqrt((this.speed**2)/2);
             this.left += Math.sqrt((this.speed**2)/2);
             this.top += -Math.sqrt((this.speed**2)/2);
+            this.updateLocation()
         }
         else if(this.keys['w'] == true && !this.isHitByObstacle["below"] && !(this.y-this.radius <= 0)){
             this.y -= this.speed
             this.top += this.speed;
+            this.updateLocation()
         } 
         else if(this.keys['d'] == true && !this.isHitByObstacle["left"] && !(this.x+this.radius >= this.canvas.width*this.scale)){
             this.x += this.speed
             this.left += -this.speed;
+            this.updateLocation()
         }
         else if(this.keys['s'] == true && !this.isHitByObstacle["above"] && !(this.y+this.radius >= this.canvas.height*this.scale)){
             this.y += this.speed
             this.top += -this.speed;
+            this.updateLocation()
         } 
         else if(this.keys['a'] == true && !this.isHitByObstacle["right"] && !(this.x-this.radius <= 0)){
             this.x -= this.speed
             this.left += this.speed;
+            this.updateLocation()
         } 
         this.draw(ctx)
-        // console.log(this.canvas)
         this.canvas.style.left = `${this.left}px`;
         this.canvas.style.top = `${this.top}px`;
+    }
+
+    updateLocation(){
+        // update location to the server;
+        this.socket.emit("updateLocation", {id: this.id, position: {x: this.x,y: this.y}});
+    }
+
+    updateDegree(){
+        this.socket.emit("updateDegree", {id: this.id, degree: this.degree});
     }
 
     draw(ctx){
@@ -144,7 +160,7 @@ export default class MainPlayer{
         ctx.strokeStyle = "rgb(158,154,117)"
         ctx.strokeStyle = "#70899D"
         ctx.strokeStyle = "#3E372C"
-        ctx.lineWidth = 10
+        ctx.lineWidth = 7
         ctx.rotate(this.degree)
         // ctx.rotate(0)
         ctx.moveTo(0, 0);
@@ -200,6 +216,7 @@ export default class MainPlayer{
                 this.degree = Math.atan(deltaY/deltaX)
             else 
                 this.degree = Math.atan(deltaY/deltaX) + Math.PI 
+            this.updateDegree();
         })
 
         //detect mousedown (shoot)
