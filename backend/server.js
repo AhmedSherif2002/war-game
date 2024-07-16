@@ -3,7 +3,9 @@ const cors = require("cors");
 const {join} = require("path")
 const { createServer } = require("http")
 const { Server } = require("socket.io")
-
+const { shoot } = require("./controller/shootController")
+const canvasWidth = 4000;
+const canvasHeight = 4100;
 const app = express();
 const server = createServer(app);
 const io = new Server(server,{
@@ -45,19 +47,24 @@ io.on("connection",(socket)=>{
     })
     // update player position
     socket.on("updateLocation", (playerLocation)=>{
-        console.log("player has moved")
+        // console.log("player has moved")
         players[playerLocation["id"]].position = playerLocation.position;
         socket.broadcast.emit("updatePlayerState", {id: playerLocation["id"], position: playerLocation.position});
     })
     // update player degree
     socket.on("updateDegree", (playerDegree)=>{
-        console.log("player has moved")
-        players[playerDegree["id"]].degree = playerDegree.position;
+        // console.log("player has moved")
+        players[playerDegree["id"]].degree = playerDegree.degree;
         socket.broadcast.emit("updatePlayerDegree", {id: playerDegree["id"], degree: playerDegree.degree});
     })
     // Send players to the frontend
     socket.on("requestPlayers",(cb)=>{
         cb(players)
+    })
+
+    // player shoots
+    socket.on("shoot",({x,y,m,c,degree})=>{
+        shoot(x, y, m, c, degree, players,socket.id)
     })
 
     // when player disconnects

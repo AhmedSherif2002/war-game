@@ -4,7 +4,7 @@ export default class Bullet{
         this.y = y;
         this.degree = degree;
         this.ctx = ctx
-        this.radius = 4
+        this.radius = 3
         this.mapLimitX = 4000;
         this.mapLimitY = 4100;
     }
@@ -36,5 +36,9 @@ export default class Bullet{
             }
         }
         return false;
+    }
+
+    detectEnemyHit(enemies){
+
     }
 }

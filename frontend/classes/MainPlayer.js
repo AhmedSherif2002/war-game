@@ -4,7 +4,7 @@ import Bullet from "./Bullet.mjs";
 export default class MainPlayer{
     keys = []
     degree = 0;
-    shoot = false
+    // shoot = false
     aim = false
     visualAngle = 60;
     visualOpacity = 0.1
@@ -16,7 +16,8 @@ export default class MainPlayer{
     } 
     left = 0;
     top = 0
-    shootingInterval
+    shootingInterval;
+    shooting = 0;
     constructor(id,x,y,canvas,obstacles,scale,ctx,bulletsController,socket){
         this.x = x*scale;
         this.y = y*scale;
@@ -28,6 +29,7 @@ export default class MainPlayer{
         this.mapObstacles = obstacles
         this.bulletsController = bulletsController
         this.socket = socket
+        // this.shoot = 
         this.listenForEvents()
         console.log(canvas.width)
     }
@@ -183,6 +185,15 @@ export default class MainPlayer{
         ctx.restore()
     }
 
+    shoot(){ // y = mx + c 
+        const x = this.x;
+        const y = this.y;
+        const m = Math.tan(this.degree);    // slope
+        const c = y - m*x;  // the cut in y-axis
+        console.log("m",m)
+        this.socket.emit("shoot", {x: x,y: y,m: m,c: c, degree: this.degree});
+    }
+
     listenForEvents(){
         // Detect button press
         document.addEventListener("keydown",(e)=>{
@@ -216,6 +227,7 @@ export default class MainPlayer{
                 this.degree = Math.atan(deltaY/deltaX)
             else 
                 this.degree = Math.atan(deltaY/deltaX) + Math.PI 
+            console.log("deg",this.degree)
             this.updateDegree();
         })
 
@@ -224,10 +236,11 @@ export default class MainPlayer{
         document.addEventListener("mousedown",(e)=>{
             console.log("aa")
             if(e.button === 0){
-                this.shoot = true;
+                // this.shoot = true;
                 this.speed = 5;
                 // this.shoot()
                 this.shootingInterval = setInterval(()=>this.bulletsController.shoot(this.x,this.y,this.degree),10);
+                this.shooting = setInterval(()=>{this.shoot()},10);
             }else{
                 this.aim =true
                 this.speed = 5;
@@ -240,39 +253,16 @@ export default class MainPlayer{
         document.addEventListener("mouseup",(e)=>{
             this.speed = 8;
             if(e.button === 0){
-                this.shoot = false
+                // this.shoot = false
                 console.log("stop")
                 clearInterval(this.shootingInterval)
+                clearInterval(this.shooting)
             }else{
                 this.aim = false
                 this.visualAngle = 60
                 this.visualOpacity = 0.1
             }
         })
-
-        // // Detect mouse click (To Shoot)
-        // this.canvas.oncontextmenu = (e)=> e.preventDefault()
-        // this.canvas.addEventListener("mousedown",(e)=>{
-        //     if(e.button === 0){
-        //         shoot = true
-        //         shootingInterval = setInterval(shootingHandle,10);
-        //         console.log("shoot")
-        //     }
-        //     else{
-        //         // aim = true
-        //         console.log("aim")
-        //     }
-        //     this.speed = 5
-        // })
-
-        // // Detect mouseup (To stop shooting)
-        // document.addEventListener("mouseup",(e)=>{
-        //     shoot = false
-        //     // aim = false
-        //     this.speed = 8;
-        //     console.log("stop")
-        //     clearInterval(shootingInterval)
-        // })
     }
 
 }

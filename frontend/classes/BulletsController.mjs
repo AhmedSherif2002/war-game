@@ -1,6 +1,7 @@
 import Bullet from "./Bullet.mjs"
 
 export default class BulletsController{
+    players = {};
     constructor(playerId,ctx,mapObstacles){
         this.playerId = playerId
         this.bullets = []
@@ -10,6 +11,11 @@ export default class BulletsController{
             this.moveBullets(this.bullets)
         },1)
     }
+
+    setPlayers(players){
+        this.players = players;
+    }
+
     shoot(x, y, degree){
         this.bullets.push(new Bullet(x,y,degree,this.ctx))
     }
