@@ -11,14 +11,15 @@ let player1;
 let players = {}
 
 // when the player connects (get the id, send info to the server, retrieve other players data)
-socket.on("playerConnect",(id)=>{
+socket.on("playerConnect",(id, team)=>{
     console.log(id)
-    player1 = new MainPlayer(id,posX,posY,canvas,mapObstacles,1,ctx,bulletsController,socket)
+    player1 = new MainPlayer(id,posX,posY,team,canvas,mapObstacles,1,ctx,bulletsController,socket)
     socket.emit("info", {id: id, name: "player 1", position: {x: posX, y: posY}}, (serverPlayers)=>{
         console.log("new player");
         // clearInterval(updatePlayersInt)
         for(let playerId in serverPlayers){
-            const player = new Player(playerId, serverPlayers[playerId].position.x, serverPlayers[playerId].position.y, 100, serverPlayers[playerId].team,ctx)
+            const color = serverPlayers[playerId].team === player1.team?"#0000ff":"red";
+            const player = new Player(playerId, serverPlayers[playerId].position.x, serverPlayers[playerId].position.y, 100, serverPlayers[playerId].team, color, ctx)
             players[playerId] = player;
             // players.push(playerId)
         }

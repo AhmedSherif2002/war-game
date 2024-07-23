@@ -1,6 +1,6 @@
 export default class Player{
     degree = 0;
-    constructor(id,x,y,health,team,ctx){
+    constructor(id,x,y,health,team,color,ctx){
         this.id = id;
         this.x = x;
         this.y = y;
@@ -8,6 +8,7 @@ export default class Player{
         this.team = team;
         this.speed = 8;
         this.radius = 30;
+        this.color = color;
         this.ctx = ctx
     }
 
@@ -27,7 +28,7 @@ export default class Player{
 
     draw(ctx){
         // console.log("abc",this.x,this.y,ctx)
-        ctx.fillStyle = "red"
+        ctx.fillStyle = this.color;
         ctx.beginPath()
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         ctx.fill()

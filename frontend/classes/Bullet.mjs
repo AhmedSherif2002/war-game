@@ -11,7 +11,7 @@ export default class Bullet{
 
     draw(){
         this.ctx.beginPath()
-        this.ctx.fillStyle = "red"
+        this.ctx.fillStyle = "#756840"
         this.ctx.arc(this.x ,this.y ,this.radius ,0 ,2*Math.PI)
         this.ctx.fill()
     }

@@ -392,7 +392,10 @@ const checkIfPlayerIsHit = (xs,xe,ys,ye,m,c,players, player)=>{
     let x = players[player].position.x;
     let y = players[player].position.y;
     for(let playerId in players){
-        if(playerId === player) continue;
+        if(playerId === player || players[playerId].team === players[player].team){ // no friendly fire
+            console.log("friendly fire");
+            continue
+        } 
         // console.log(playerId,players[playerId]);
         const xc = players[playerId].position.x;
         const yc = players[playerId].position.y;
@@ -401,11 +404,11 @@ const checkIfPlayerIsHit = (xs,xe,ys,ye,m,c,players, player)=>{
         const b = 2*c1*m - 2*xc;
         const ceqn = xc**2 + c1**2 - radius**2;
         let t = b**2 - 4*a*ceqn;
-        console.log(t)
+        // console.log(t)
         if(t < 0) continue; // no hit
         const x1 = (-b + Math.sqrt(t))/(2*a);
         const x2 = (-b - Math.sqrt(t))/(2*a);
-        console.log(xs,xe,x2)
+        // console.log(xs,xe,x2)
         if((xs <= x1 && x1 <= xe) || (xs <= x2 && x1 <= xe)){
             const y1 = m*x1 + c;
             const y2 = m*x2 + c;
@@ -428,7 +431,7 @@ const checkObstaclesInBetween = (x,y,x1,y1,m,c)=>{
         const xe = xs + obstacle.width;
         const ys = obstacle.y;
         const ye = ys + obstacle.height;
-        console.log("x:=",x,x1,xs);
+        // console.log("x:=",x,x1,xs);
         let xpb = Math.min(x,x1)
         let xpe = Math.max(x,x1)
         let ypb = Math.min(y,y1)
@@ -436,7 +439,7 @@ const checkObstaclesInBetween = (x,y,x1,y1,m,c)=>{
         if(((xpb <= xs && xs <= xpe) || (xpb <= xe && xe <= xpe))){
             let yc = m*xs + c;
             let yc1 = m*xe + c;       
-            console.log("y=>",yc1,ys,ye)
+            // console.log("y=>",yc1,ys,ye)
             if((xpb <= xs && xs <= xpe && ys <= yc && yc <= ye) || (xpb <= xe && xe <= xpe && ys <= yc1 && yc1 <= ye)){
                 return true;
             }  

@@ -18,7 +18,7 @@ export default class MainPlayer{
     top = 0
     shootingInterval;
     shooting = 0;
-    constructor(id,x,y,canvas,obstacles,scale,ctx,bulletsController,socket){
+    constructor(id,x,y,team,canvas,obstacles,scale,ctx,bulletsController,socket){
         this.x = x*scale;
         this.y = y*scale;
         this.id = id
@@ -29,6 +29,7 @@ export default class MainPlayer{
         this.mapObstacles = obstacles
         this.bulletsController = bulletsController
         this.socket = socket
+        this.team = team;
         // this.shoot = 
         this.listenForEvents()
         console.log(canvas.width)
@@ -147,7 +148,7 @@ export default class MainPlayer{
     }
 
     draw(ctx){
-        ctx.fillStyle = "red"
+        ctx.fillStyle = "#0000ff"
         ctx.beginPath()
         ctx.arc(this.x,this.y,this.radius,0,2 * Math.PI);
         ctx.fill()
