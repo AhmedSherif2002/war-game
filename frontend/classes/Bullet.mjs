@@ -30,7 +30,7 @@ export default class Bullet{
                 || 
                 (this.x >= this.mapLimitX || this.y >= this.mapLimitY || this.x <= 0 || this.y <= 0)
             ){
-                console.log("this hit")
+                // console.log("this hit")
                 return true;
                 // this.shift() 
             }

@@ -6,7 +6,7 @@ export default class MainPlayer{
     degree = 0;
     // shoot = false
     aim = false
-    visualAngle = 60;
+    visualAngle = 45;
     visualOpacity = 0.1
     isHitByObstacle = { // obstacle hitting
         "left": false,
@@ -186,12 +186,20 @@ export default class MainPlayer{
         ctx.restore()
     }
 
+    drawVisualRange(){
+
+    }
+
+    getPosition(){
+        return { x:this.x, y:this.y, degree:this.degree, team:this.team};
+    }
+
     shoot(){ // y = mx + c 
         const x = this.x;
         const y = this.y;
         const m = Math.tan(this.degree);    // slope
         const c = y - m*x;  // the cut in y-axis
-        console.log("m",m)
+        // console.log("m",m)
         this.socket.emit("shoot", {x: x,y: y,m: m,c: c, degree: this.degree});
     }
 
@@ -224,18 +232,29 @@ export default class MainPlayer{
             const relativeY = mouseY - canvasY;
             const deltaX = relativeX - this.x;
             const deltaY = relativeY - this.y;
-            if(deltaX >= 0)
+            
+            if(deltaX >= 0 && deltaY >= 0){
                 this.degree = Math.atan(deltaY/deltaX)
-            else 
-                this.degree = Math.atan(deltaY/deltaX) + Math.PI 
-            console.log("deg",this.degree)
+            }else if(deltaX < 0 && deltaY >= 0){
+                this.degree = Math.PI - Math.atan(deltaY/-deltaX); 
+            }else if(deltaX < 0 && deltaY < 0){
+                this.degree = Math.atan(deltaY/deltaX) + Math.PI;
+            }else if(deltaX >= 0 && deltaY < 0){
+                this.degree = 2 * Math.PI - Math.atan(-deltaY/deltaX);
+            }
+
+            // if(deltaX >= 0)
+            //     this.degree = Math.atan(deltaY/deltaX)
+            // else 
+            //     this.degree = Math.atan(deltaY/deltaX) + Math.PI 
+            // console.log("deg",this.degree)
             this.updateDegree();
         })
 
         //detect mousedown (shoot)
         this.canvas.oncontextmenu = (e)=> e.preventDefault()
         document.addEventListener("mousedown",(e)=>{
-            console.log("aa")
+            // console.log("aa")
             if(e.button === 0){
                 // this.shoot = true;
                 this.speed = 5;

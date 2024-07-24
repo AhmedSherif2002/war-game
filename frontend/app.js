@@ -18,7 +18,7 @@ socket.on("playerConnect",(id, team)=>{
         console.log("new player");
         // clearInterval(updatePlayersInt)
         for(let playerId in serverPlayers){
-            const color = serverPlayers[playerId].team === player1.team?"#0000ff":"red";
+            const color = serverPlayers[playerId].team === team?"#0000ff":"red";
             const player = new Player(playerId, serverPlayers[playerId].position.x, serverPlayers[playerId].position.y, 100, serverPlayers[playerId].team, color, ctx)
             players[playerId] = player;
             // players.push(playerId)
@@ -29,7 +29,8 @@ socket.on("playerConnect",(id, team)=>{
 
 socket.on("newPlayerConnects", (player)=>{
     console.log(player.id,player);
-    const newPlayer = new Player(player.id, player.position.x, player.position.y, 100, player.team, ctx)
+    const color = player.team === player1.team?"#0000ff":"red";
+    const newPlayer = new Player(player.id, player.position.x, player.position.y, 100, player.team, color,ctx)
     players[player.id] = newPlayer;
 })
 
@@ -459,7 +460,7 @@ const updatePlayers = ()=>{
     for(let playerID in players){
         if(playerID === player1.id) continue
         // players[playerID].darw(ctx)
-        players[playerID].update(players[playerID].x,players[playerID].y,players[playerID].health,players[playerID].degree,players[playerID].speed,ctx)
+        players[playerID].update(players[playerID].x,players[playerID].y,players[playerID].health,players[playerID].degree,players[playerID].speed, player1.getPosition(),ctx)
     }
 }
 

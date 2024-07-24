@@ -52,12 +52,13 @@ io.on("connection",(socket)=>{
         console.log(player.id,player.name)
         players[player.id].name = player.name;
         players[player.id].health = player.health =100;
-        players[player.id].degree = player.speed = 0;
+        players[player.id].degree = player.degree = 0;
         players[player.id].position = player.position;
         // players[player.id].team = player.team = 1;
         players[player.id].speed = player.speed = 8;
         cb(players)
         console.log(player)
+        player.team = players[player.id].team;
         socket.broadcast.emit("newPlayerConnects", player);
         console.log(players)
     })
