@@ -242,12 +242,6 @@ export default class MainPlayer{
             }else if(deltaX >= 0 && deltaY < 0){
                 this.degree = 2 * Math.PI - Math.atan(-deltaY/deltaX);
             }
-
-            // if(deltaX >= 0)
-            //     this.degree = Math.atan(deltaY/deltaX)
-            // else 
-            //     this.degree = Math.atan(deltaY/deltaX) + Math.PI 
-            // console.log("deg",this.degree)
             this.updateDegree();
         })
 

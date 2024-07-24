@@ -366,7 +366,7 @@ let mapObstacles = [  // map obstacles
     },
 ]
 
-const shoot = (x, y, m, c, degree, players, playerId)=>{
+const shoot = (x, y, m, c, degree, players, shooter)=>{
     let xs,xe;
     let ys,ye; 
     // define the domain and the range of the line equation
@@ -384,21 +384,21 @@ const shoot = (x, y, m, c, degree, players, playerId)=>{
         ys = 0;
         ye = y;
     }
-    checkIfPlayerIsHit(xs,xe,ys,ye,m,c,players, playerId)
+    checkIfPlayerIsHit(xs,xe,ys,ye,m,c,players, shooter)
 }
 
 const checkIfPlayerIsHit = (xs,xe,ys,ye,m,c,players, player)=>{
     console.log("checking for hit")
     let x = players[player].position.x;
     let y = players[player].position.y;
-    for(let playerId in players){
-        if(playerId === player || players[playerId].team === players[player].team){ // no friendly fire
+    for(let shooter in players){
+        if(shooter === player || players[shooter].team === players[player].team){ // no friendly fire
             console.log("friendly fire");
             continue
         } 
-        // console.log(playerId,players[playerId]);
-        const xc = players[playerId].position.x;
-        const yc = players[playerId].position.y;
+        // console.log(shooter,players[shooter]);
+        const xc = players[shooter].position.x;
+        const yc = players[shooter].position.y;
         const c1 = c-yc;
         const a = 1+m**2;
         const b = 2*c1*m - 2*xc;

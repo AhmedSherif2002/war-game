@@ -81,7 +81,8 @@ io.on("connection",(socket)=>{
 
     // player shoots
     socket.on("shoot",({x,y,m,c,degree})=>{
-        shoot(x, y, m, c, degree, players,socket.id);
+        const shooter = socket.id
+        shoot(x, y, m, c, degree, players,shooter);
     })
 
     // when player disconnects
