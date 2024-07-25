@@ -365,6 +365,13 @@ let mapObstacles = [  // map obstacles
         height: 400
     },
 ]
+// let playersHit = {};
+
+// const initPlayersHit = (players)=>{
+//     for(let player in players){
+//         playersHit[player] = {}
+//     }
+// }
 
 const shoot = (x, y, m, c, degree, players, shooter)=>{
     let xs,xe;
@@ -384,21 +391,22 @@ const shoot = (x, y, m, c, degree, players, shooter)=>{
         ys = 0;
         ye = y;
     }
-    checkIfPlayerIsHit(xs,xe,ys,ye,m,c,players, shooter)
+    return checkIfPlayerIsHit(xs,xe,ys,ye,m,c,players, shooter); // return the players who were hit.
 }
 
-const checkIfPlayerIsHit = (xs,xe,ys,ye,m,c,players, player)=>{
+const checkIfPlayerIsHit = (xs,xe,ys,ye,m,c,players, shooter)=>{
     console.log("checking for hit")
-    let x = players[player].position.x;
-    let y = players[player].position.y;
-    for(let shooter in players){
-        if(shooter === player || players[shooter].team === players[player].team){ // no friendly fire
+    let x = players[shooter].position.x;
+    let y = players[shooter].position.y;
+    let playersHit = [];
+    for(let player in players){
+        if(player === shooter || players[player].team === players[shooter].team){ // no friendly fire
             console.log("friendly fire");
             continue
-        } 
-        // console.log(shooter,players[shooter]);
-        const xc = players[shooter].position.x;
-        const yc = players[shooter].position.y;
+        }
+        // console.log(player,players[player]);
+        const xc = players[player].position.x;
+        const yc = players[player].position.y;
         const c1 = c-yc;
         const a = 1+m**2;
         const b = 2*c1*m - 2*xc;
@@ -416,12 +424,14 @@ const checkIfPlayerIsHit = (xs,xe,ys,ye,m,c,players, player)=>{
                 let obstacleHit = checkObstaclesInBetween(x,y,xc,yc,m,c);
                 if(!obstacleHit){
                     console.log("player is hit");
+                    playersHit.push(player);
                 }else{
                     console.log("player isn't hit but in the line of fire");
                 }
             }
         }
     }
+    return playersHit;
 }
 
 const checkObstaclesInBetween = (x,y,x1,y1,m,c)=>{

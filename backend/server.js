@@ -17,16 +17,19 @@ app.use(express.static('../frontend'))
 app.use(cors({
     origin: "*"
 }))
+
 let counter = 0;
 let players = {}
 let team1 = []
 let team2 = []
+let playersShot = {};
 
 server.listen(4000,()=>{
     console.log("server is running on port", 4000)
 })
 
 const assignTeam = (teamNumber, id)=>{
+    playersShot[id] = {}
     console.log("teamNumber",teamNumber, teamNumber === 1)
     if(teamNumber === 1){
         team1.push(id)
@@ -42,6 +45,7 @@ io.on("connection",(socket)=>{
     console.log("connection established")
     console.log(socket.id)
     players[socket.id] = {}
+    
     console.log(counter)
     const team = (counter % 2 === 0)?1:2;
     assignTeam(team,socket.id);
@@ -61,6 +65,7 @@ io.on("connection",(socket)=>{
         player.team = players[player.id].team;
         socket.broadcast.emit("newPlayerConnects", player);
         console.log(players)
+        checkMemUsage();
     })
     // update player position
     socket.on("updateLocation", (playerLocation)=>{
@@ -82,12 +87,23 @@ io.on("connection",(socket)=>{
     // player shoots
     socket.on("shoot",({x,y,m,c,degree})=>{
         const shooter = socket.id
-        shoot(x, y, m, c, degree, players,shooter);
+        let playersHit = shoot(x, y, m, c, degree, players,shooter);
+        for(let player of playersHit){
+            if(players[player].health > 0){
+                players[player].health -= 10;
+                playersShot[player][shooter] = playersShot[player][shooter]?playersShot[player][shooter]+10:10;
+            }
+            if(players[player].health === 0){
+                playersShot[player] = {};
+            }
+        }
+        console.log("Player shot ",playersShot)
     })
 
     // when player disconnects
     socket.on("disconnect",()=>{
         console.log("disconnected")
+        checkMemUsage();
     })
 })
 
@@ -95,3 +111,11 @@ io.on("connection",(socket)=>{
 app.get("/",(req,res)=>{
     res.sendFile(join(__dirname,"../frontend/index.html"))
 })
+
+// setTimeout(()=>{
+//     process.exit();
+// },5000)
+
+const checkMemUsage = ()=>{
+    console.log(process.memoryUsage());
+}
