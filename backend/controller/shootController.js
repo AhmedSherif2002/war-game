@@ -377,7 +377,8 @@ const shoot = (x, y, m, c, degree, players, shooter)=>{
     let xs,xe;
     let ys,ye; 
     // define the domain and the range of the line equation
-    if(degree >= -Math.PI/2 && degree <= Math.PI/2){    // +ve x
+    // if(degree >= -Math.PI/2 && degree <= Math.PI/2){    // +ve x
+    if(degree >= 0 && degree <= Math.PI/2 || degree >= 3/2*Math.PI && degree <= 2*Math.PI){    // +ve x
         xs = x;
         xe = canvasWidth;
     }else{
@@ -400,6 +401,8 @@ const checkIfPlayerIsHit = (xs,xe,ys,ye,m,c,players, shooter)=>{
     let y = players[shooter].position.y;
     let playersHit = [];
     for(let player in players){
+        console.log(players[player].health, player);
+        if(players[player].health === 0) continue;
         if(player === shooter || players[player].team === players[shooter].team){ // no friendly fire
             console.log("friendly fire");
             continue

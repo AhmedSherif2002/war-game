@@ -9,11 +9,26 @@ setTimeout(()=>{
 },1000)
 let player1;
 let players = {}
+const respawn = {
+    1:{
+        x: 50,
+        y: 50,
+    },
+    2:{
+        x: 100,
+        y: 4000
+    }
+}
 
 // when the player connects (get the id, send info to the server, retrieve other players data)
-socket.on("playerConnect",(id, team)=>{
+socket.on("playerConnect",(id, team, position)=>{
     console.log(id)
+    posX = respawn[team].x
+    posY = respawn[team].y
+    // Adjust the Camera to be at the spawn place
+    canvas.style.transform = `translate(${-(posX-camWidth/2)}px,${-(posY-camHeight/2)}px)`;
     player1 = new MainPlayer(id,posX,posY,team,canvas,mapObstacles,1,ctx,bulletsController,socket)
+    update()
     socket.emit("info", {id: id, name: "player 1", position: {x: posX, y: posY}}, (serverPlayers)=>{
         console.log("new player");
         // clearInterval(updatePlayersInt)
@@ -27,6 +42,7 @@ socket.on("playerConnect",(id, team)=>{
     });
 })
 
+// new player connects to the game server
 socket.on("newPlayerConnects", (player)=>{
     console.log(player.id,player);
     const color = player.team === player1.team?"#0000ff":"red";
@@ -45,6 +61,29 @@ socket.on("updatePlayerDegree",(player)=>{ // when any player on the server stat
     players[player.id].degree = player.degree
 })
 
+socket.on("playerKilled", (shooter, killedPlayer)=>{ // when a player is killed
+    players[killedPlayer].health = 0;
+    players[killedPlayer].killed = true;
+    if(killedPlayer === player1.id){
+        // alert("You are killed by " + shooter);
+        ctx.clearRect(0,0,width*1,height*1);
+        killed = true
+        killHandler(shooter)
+    }
+    if(shooter === player1.id){
+        console.log("you killed", killedPlayer);
+    }
+    console.log(shooter, killedPlayer)
+})
+
+socket.on("respawn", player=>{
+    players[player].health = 100;
+    players[player].killed = false;
+    players[player].position = respawn[players[player].team];
+    if(player === player1.id)
+        respawnHandler()
+})
+
 const canvas = document.getElementById("canvas");
 const miniMapCanvas = document.getElementById("minimap")
 const camera = document.getElementById("camera")
@@ -60,6 +99,7 @@ let posY = height / 2; // y-position of player
 let degree = 0; // Degree of rotaion of the player
 let shoot = false; // for shooting 
 let aim = false;
+let killed = false;
 let bullets = []
 // Images
 let fighterImage = new Image();
@@ -436,14 +476,17 @@ miniMapCanvas.width = width / 16;
 miniMapCanvas.width = height / 16;
 miniCtx.scale(1/16,1/16)
 const miniMap = new Map(1/16,miniCtx)
-// Adjust the Camera to be at the spawn place
-canvas.style.transform = `translate(${-(posX-camWidth/2)}px,${-(posY-camHeight/2)}px)`;
+
 // classes
 const bulletsController = new BulletsController(1,ctx,mapObstacles)
 // const player1 = new MainPlayer(posX,posY,canvas,mapObstacles,1,ctx,bulletsController)
 const mainMap = new Map(1,ctx);
 
 const update = ()=>{
+    // if(!player1) update();
+    if(killed){
+        return;
+    }
     requestAnimationFrame(update)
     ctx.clearRect(0,0,width*1,height*1) // clear the canvas for rerender
     miniCtx.clearRect(0,0,width*16,height*16) // clear the canvas for rerender
@@ -458,13 +501,62 @@ const update = ()=>{
 const updatePlayers = ()=>{
     // draw the players
     for(let playerID in players){
+        if(players[playerID].health === 0) continue;
         if(playerID === player1.id) continue
         // players[playerID].darw(ctx)
         players[playerID].update(players[playerID].x,players[playerID].y,players[playerID].health,players[playerID].degree,players[playerID].speed, player1.getPosition(),ctx)
     }
 }
 
-update()
+
+// update()
+
+const killHandler = (player)=>{
+    canvas.style.opacity = 0.5;
+    const div = document.createElement("div");
+    const msg = document.createElement("div");
+    const respawn = document.createElement("div");
+    msg.innerHTML = `You have been killed by ${player}`;
+    let i = 3
+    respawn.innerHTML = `Respawning in: ${i}`;
+    setInterval(()=>{respawn.innerHTML = `Respawning in: ${--i}`;},1000);
+    div.classList.add("killedDiv")
+    msg.classList.add("msg");
+    respawn.classList.add("respawn");
+    div.appendChild(msg);
+    div.appendChild(respawn);
+    camera.appendChild(div);
+    div.setAttribute("id","killedDiv")
+    console.log(div)
+    console.log(camera)
+}
+
+const respawnHandler = ()=>{
+    console.log("respawning")
+    console.log(camera.children)
+    deleteChild(camera, 0, "killedDiv");
+    canvas.style.opacity = 1;
+    killed = false;
+    let newPosX = player1.x =  respawn[player1.team].x
+    let newPosY = player1.y = respawn[player1.team].y
+    console.log(newPosX, newPosY);
+    // Adjust the Camera to be at the spawn place
+    canvas.style.transform = `translate(${-(newPosX-camWidth/2)}px,${-(newPosY-camHeight/2)}px)`;
+    player1.left = 0
+    player1.top = 0
+    canvas.style.left = `${0}px`;
+    canvas.style.top = `${0}px`;
+    update();  
+}
+
+const deleteChild = (parent, index, targetedChild)=>{
+    console.log(parent.children[index])
+    if(parent.children[index].id === targetedChild){
+        parent.removeChild(parent.children[index]);
+        return
+    }
+    return deleteChild(parent, index+1, targetedChild);
+}
 
 // const render = ()=>{ // to render the map    
 //     // Make the map divs

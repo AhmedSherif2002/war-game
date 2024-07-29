@@ -23,6 +23,16 @@ let players = {}
 let team1 = []
 let team2 = []
 let playersShot = {};
+// const respwanBase = {
+//     1:{
+//         x: 2000,
+//         y: 2000,
+//     },
+//     2:{
+//         x: 2050,
+//         y: 2050,
+//     }
+// }
 
 server.listen(4000,()=>{
     console.log("server is running on port", 4000)
@@ -34,9 +44,11 @@ const assignTeam = (teamNumber, id)=>{
     if(teamNumber === 1){
         team1.push(id)
         players[id].team = 1;
+        // players[id].position = respwanBase[1];
     }else{
         team2.push(id)
         players[id].team = 2;
+        // players[id].position = respwanBase[2];
     }
 }
 
@@ -48,6 +60,7 @@ io.on("connection",(socket)=>{
     
     console.log(counter)
     const team = (counter % 2 === 0)?1:2;
+    // const position = respwanBase[team];
     assignTeam(team,socket.id);
     players[socket.id].id = counter++;
     io.to(socket.id).emit("playerConnect", socket.id, team) // Send the id back to the player
@@ -65,7 +78,7 @@ io.on("connection",(socket)=>{
         player.team = players[player.id].team;
         socket.broadcast.emit("newPlayerConnects", player);
         console.log(players)
-        checkMemUsage();
+        // checkMemUsage();
     })
     // update player position
     socket.on("updateLocation", (playerLocation)=>{
@@ -90,20 +103,22 @@ io.on("connection",(socket)=>{
         let playersHit = shoot(x, y, m, c, degree, players,shooter);
         for(let player of playersHit){
             if(players[player].health > 0){
-                players[player].health -= 10;
-                playersShot[player][shooter] = playersShot[player][shooter]?playersShot[player][shooter]+10:10;
+                players[player].health -= 5;
+                playersShot[player][shooter] = playersShot[player][shooter]?playersShot[player][shooter]+5:5;
             }
             if(players[player].health === 0){
                 playersShot[player] = {};
+                io.emit("playerKilled", shooter, player);
+                setTimeout(()=>respawn(player),3000);
             }
         }
-        console.log("Player shot ",playersShot)
+        // console.log("Players shot ",playersShot)
     })
 
     // when player disconnects
     socket.on("disconnect",()=>{
         console.log("disconnected")
-        checkMemUsage();
+        // checkMemUsage();
     })
 })
 
@@ -115,6 +130,13 @@ app.get("/",(req,res)=>{
 // setTimeout(()=>{
 //     process.exit();
 // },5000)
+
+const respawn = (player)=>{
+    console.log(player)
+    players[player].health = 100;
+    // players[player].position = {x:}
+    io.emit("respawn" ,player);
+}
 
 const checkMemUsage = ()=>{
     console.log(process.memoryUsage());

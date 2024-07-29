@@ -411,7 +411,7 @@ export default class Player{
 
         const c = y - m*x;
         const obstacle = this.checkObstaclesInBetween(this.x, this.y, x, y, m, c)
-        console.log(degree1,degree);
+        // console.log(degree1,degree);
         if(degree-Math.PI*(1/4) < 0){
             if(degree1 >= ((degree-Math.PI*(1/4)) + 2*Math.PI) && !obstacle) return true;
         }
