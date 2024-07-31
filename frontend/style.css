@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 *{
     /* margin: 100px; */
     /* overflow: hidden; */
@@ -106,7 +110,12 @@
 }
 
 .nav-bar div:hover{
-    border-bottom: 2px solid white;
+    border-bottom: 2px solid white; 
+}
+
+.nav-bar div a{
+    text-decoration: none;
+    color: inherit;
 }
 
 .main{
@@ -205,3 +214,7 @@
 .main-menu div:last-child{
     border-radius: 0px 0px 10px 10px;
 }
+
+/* .profile-header{
+    color: blue;
+} */
