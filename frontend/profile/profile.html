@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../main.css">
     <title>Document</title>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">GAME</div>
-        <div class="nav-bar">
-            <div class="">Find Match</div>
-            <div class="">Dashboard</div>
-            <div class="profile">Profile</div>
+    <div class="header h-15 ">
+        <div class="logo"><a class="text-none" href="../home/home.html">GAME</a></div>
+        <div class="nav-bar flex-row items-center justify-center gap-8 h-full hidden lg:flex">
+            <div class="flex flex-col justify-center p-2">Find Match</div>
+            <div class="flex flex-col justify-center p-2">Dashboard</div>
+            <div class="profile flex flex-col justify-center p-2"><a href="profile.html">Profile</a></div>
         </div>
     </div>
     <div class="profile-main">
-        <div class="profile m-auto w-4/5 bg-slate-100 py-4 rounded-lg mt-10">
+        <div class="profile m-auto w-4/5 bg-slate-100 py-4 rounded-lg mt-10 hidden">
             <div class="profile-header border-b-2 pb-1 pl-4 border-stone-400">
                 <div class="text-red-600 text-3xl">ProPlayer9990</div>
             </div>
@@ -46,6 +46,9 @@
                 <button class="bg-white text-green-500 text-xl font-semibold rounded-md px-3 py-1 shadow-md hover:bg-slate-200">Friends</button>
                 <button class="bg-white text-red-500 text-xl font-semibold rounded-md px-3 py-1 shadow-md hover:bg-slate-200">Account Settings</button>
             </div>
+        </div>
+        <div class="not-registered m-auto w-4/5 py-4 rounded-lg mt-10 bg-red-400">
+            <div class="text-center text-white text-xl ">YOU ARE NOT LOGGED IN, <a class="font-bold" href="../login/login.html">LOGIN</a></div>
         </div>
     </div>
 </body>

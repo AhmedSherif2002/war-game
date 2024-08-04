@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../main.css">
+    <title>War Game</title>
+</head>
+<body>
+    <div class="header h-15 ">
+        <div class="logo"><a class="text-none" href="home.html">GAME</a></div>
+        <div class="nav-bar flex-row items-center justify-center gap-8 h-full hidden lg:flex">
+            <div class="flex flex-col justify-center p-2">Find Match</div>
+            <div class="flex flex-col justify-center p-2">Dashboard</div>
+            <div class="profile flex flex-col justify-center p-2"><a href="../profile/profile.html">Profile</a></div>
+        </div>
+    </div>
+    <div class="main flex flex-col gap-5 mt-5 mx-3 mb-3">
+        <div class="primary text-3xl flex flex-row gap-4 w-full lg:w-1/2">
+            <div class="find-match-btn py-2 text-center lg:flex flex-row w-full justify-center items-center hidden">Find Match</div>
+            <div class="add-friend-button py-2 text-center flex flex-row w-full justify-center items-center">Add Friend&nbsp;+</div>
+            <div class="profile-options py-2 w-full cursor-pointer" onclick="">&nbsp;
+                <div id="profile-span1" class="h-full flex flex-col items-center justify-center"><a class="w-full text-center" href="../profile/profile.html">Profile</a></div>
+                <div id="profile-span2" class="h-full flex flex-col items-center justify-center"><a class="w-full text-center" href="../profile/profile.html">Register</a></div>
+            </div>
+        </div>
+        <div class="main-menu flex flex-col rounded-lg gap-y-5 w-full lg:w-1/2 text-3xl">
+            <div class="hidden lg:block">Find Match</div>
+            <div class="hidden lg:block">Custom game</div>
+            <div class="hidden lg:block">LAN</div>
+            <div class="hidden lg:block">Tutorial</div>
+            <div class="lg:block"><a href="../profile/profile.html">Profile</a></div>
+            <div class="lg:block">Friends</div>
+            <div class="lg:block">Dashboard</div>
+        </div>
+    </div>
+</body>
+<script src="main.js"></script>
+</html>

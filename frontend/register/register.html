@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../main.css">
+    <link rel="stylesheet" href="../style.css">
+    <title>Register</title>
+</head>
+<body>
+    <div class="header h-15 ">
+        <div class="logo"><a class="text-none" href="../home/home.html">GAME</a></div>
+        <div class="nav-bar flex-row items-center justify-center gap-8 h-full hidden lg:flex">
+            <div class="flex flex-col justify-center p-2">Find Match</div>
+            <div class="flex flex-col justify-center p-2">Dashboard</div>
+            <div class="profile flex flex-col justify-center p-2"><a href="../profile/profile.html">Profile</a></div>
+        </div>
+    </div>
+    <div class="register-main m-auto bg-slate-100 lg:w-9/12 md:w-10/12 w-11/12 mt-3 lg:mt-10 py-6 rounded-lg flex flex-col items-center mb-3">
+        <h3 class="text-center lg:text-2xl md:text-xl sm:text-xl font-bold">REGISTER</h3>
+        <form action="" id="registerForm" class="p-5 flex flex-col gap-y-4 w-full lg:w-4/6" onsubmit="">
+            <div class="flex flex-col lg:text-2xl md:text-xl sm:text-xl lg:gap-y-2 md:gap-2 gap-1">
+                <label class="text-xs md:text-base lg:text-xl" for="firstname">First Name</label>
+                <input type="text" name="firstname" id="firstname" class="rounded-md text-xs md:text-base lg:text-xl lg:p-2 md:p-2 sm:p-2 outline-none border-b-2 border-emerald-500">
+            </div>
+            <div class="flex flex-col lg:text-2xl md:text-xl sm:text-xl lg:gap-y-2 md:gap-2 gap-1">
+                <label class="text-xs md:text-base lg:text-xl" for="lastname">Last Name</label>
+                <input type="text" name="lastname" id="lastname" class="rounded-md text-xs md:text-base lg:text-xl lg:p-2 md:p-2 sm:p-2 outline-none border-b-2 border-emerald-500">
+            </div>
+            <div class="flex flex-col lg:text-2xl md:text-xl sm:text-xl lg:gap-y-2 md:gap-2 gap-1">
+                <label class="text-xs md:text-base lg:text-xl" for="gamertag">Player Tag <span class="lg:text-xl md:text-base text-xs">(The tag appearing to other players)</span></label>
+                <input type="text" name="gamertag" id="gamertag" class="rounded-md text-xs md:text-base lg:text-xl lg:p-2 md:p-2 sm:p-2 outline-none border-b-2 border-emerald-500">
+            </div>
+            <div class="flex flex-col lg:text-2xl md:text-xl sm:text-xl lg:gap-y-2 md:gap-2 gap-1">
+                <label class="text-xs md:text-base lg:text-xl" for="email">Email</label>
+                <input type="email" name="email" id="email" class="rounded-md text-xs md:text-base lg:text-xl lg:p-2 md:p-2 sm:p-2 outline-none border-b-2 border-emerald-500">
+            </div>
+            <div class="flex flex-col lg:text-2xl md:text-xl sm:text-xl lg:gap-y-2 md:gap-2 gap-1">
+                <label class="text-xs md:text-base lg:text-xl" for="password">Password</label>
+                <input type="password" name="password" id="password" class="rounded-md text-xs md:text-base lg:text-xl lg:p-2 md:p-2 sm:p-2 outline-none border-b-2 border-emerald-500">
+            </div>
+            <div class="flex flex-col lg:text-2xl md:text-xl sm:text-xl lg:gap-y-2 md:gap-2 gap-1">
+                <label class="text-xs md:text-base lg:text-xl" for="confirm-password">Confirm Password</label>
+                <input type="password" name="confirm-password" id="confirm-password" class="rounded-md text-xs md:text-base lg:text-xl lg:p-2 md:p-2 sm:p-2 outline-none border-b-2 border-emerald-500">
+            </div>
+            <input type="submit" class="cursor-pointer text-2xl font-semibold px-10 rounded-lg border-2 border-emerald-500 
+            bg-emerald-500 text-white hover:bg-white hover:text-black duration-500 p-2">
+        </form>
+        <p class="text-xs md:text-base lg:text-xl">Already have an account?&nbsp;<a href="../login/login.html" class="font-semibold text-emerald-500">LOGIN</a></p>
+    </div>
+</body>
+<script src="register.js"></script>
+</html>
