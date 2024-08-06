@@ -35,7 +35,6 @@ const assignTeam = (teamNumber, id)=>{
     if(teamNumber === 1){
         team1.push(id)
         players[id].team = 1;
-        // players[id].position = respwanBase[1];
     }else{
         team2.push(id)
         players[id].team = 2;
