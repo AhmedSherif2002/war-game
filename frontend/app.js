@@ -3,7 +3,7 @@ import Map from "./classes/Map.js";
 import BulletsController from "./classes/BulletsController.mjs";
 import Player from "./classes/Player.js";
 
-const socket = io("http://localhost:4000/");
+const socket = io("http://localhost:3000/");
 setTimeout(()=>{
     console.log(socket)
 },1000)
