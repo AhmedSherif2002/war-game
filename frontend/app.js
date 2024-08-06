@@ -36,7 +36,6 @@ socket.on("playerConnect",(id, team, position)=>{
             const color = serverPlayers[playerId].team === team?"#0000ff":"red";
             const player = new Player(playerId, serverPlayers[playerId].position.x, serverPlayers[playerId].position.y, 100, serverPlayers[playerId].team, color, ctx)
             players[playerId] = player;
-            // players.push(playerId)
         }
         console.log(players)
     });
