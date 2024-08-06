@@ -7,6 +7,7 @@ const { shoot } = require("./controller/shootController")
 const canvasWidth = 4000;
 const canvasHeight = 4100;
 const app = express();
+const port = process.env.PORT | 3000;
 const server = createServer(app);
 const io = new Server(server,{
     cors:{
@@ -23,19 +24,9 @@ let players = {}
 let team1 = []
 let team2 = []
 let playersShot = {};
-// const respwanBase = {
-//     1:{
-//         x: 2000,
-//         y: 2000,
-//     },
-//     2:{
-//         x: 2050,
-//         y: 2050,
-//     }
-// }
 
-server.listen(4000,()=>{
-    console.log("server is running on port", 4000)
+server.listen(port,()=>{
+    console.log("server is running on port", port)
 })
 
 const assignTeam = (teamNumber, id)=>{
