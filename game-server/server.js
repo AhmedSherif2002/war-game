@@ -108,6 +108,10 @@ io.on("connection",(socket)=>{
     // when player disconnects
     socket.on("disconnect",()=>{
         console.log("disconnected")
+        if(players[socket.id].team === 1) team1.splice(team1.indexOf(socket.id),1);
+        else team2.splice(team2.indexOf(socket.id),1);
+        delete players[socket.id];
+        io.emit("playerDisconnected", socket.id);
         // checkMemUsage();
     })
 })
@@ -124,7 +128,6 @@ app.get("/",(req,res)=>{
 const respawn = (player)=>{
     console.log(player)
     players[player].health = 100;
-    // players[player].position = {x:}
     io.emit("respawn" ,player);
 }
 

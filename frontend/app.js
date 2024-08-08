@@ -3,7 +3,7 @@ import Map from "./classes/Map.js";
 import BulletsController from "./classes/BulletsController.mjs";
 import Player from "./classes/Player.js";
 
-const socket = io("https://war-game-server.onrender.com/");
+const socket = io("http://localhost:3000/");
 setTimeout(()=>{
     console.log(socket)
 },1000)
@@ -81,6 +81,11 @@ socket.on("respawn", player=>{
     players[player].position = respawn[players[player].team];
     if(player === player1.id)
         respawnHandler()
+})
+
+socket.on("playerDisconnected", (disconnectedPlayer)=>{
+    delete players[disconnectedPlayer];
+
 })
 
 const canvas = document.getElementById("canvas");
@@ -536,13 +541,14 @@ const respawnHandler = ()=>{
     deleteChild(camera, 0, "killedDiv");
     canvas.style.opacity = 1;
     killed = false;
-    let newPosX = player1.x =  respawn[player1.team].x
-    let newPosY = player1.y = respawn[player1.team].y
+    let newPosX = player1.x =  respawn[player1.team].x;
+    let newPosY = player1.y = respawn[player1.team].y;
+    player1.left = 0
+    player1.top = 0
+    player1.updateLocation();
     console.log(newPosX, newPosY);
     // Adjust the Camera to be at the spawn place
     canvas.style.transform = `translate(${-(newPosX-camWidth/2)}px,${-(newPosY-camHeight/2)}px)`;
-    player1.left = 0
-    player1.top = 0
     canvas.style.left = `${0}px`;
     canvas.style.top = `${0}px`;
     update();  
