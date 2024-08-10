@@ -40,14 +40,31 @@ function submitForm(e){
     postData(`${apiUrl}register`,user).then(async response=>{
         const res = await response.json();
         console.log(res);
+        if(!res.success){
+            if(res.message === "This email is already used"){
+                const emailWarning = document.getElementById("emailWarningParagraph");
+                const email = document.getElementById("email");
+                emailWarning.classList.remove("hidden");
+                email.style.borderColor = "red";
+            }
+            if(res.message === "This gamer tag is already used"){
+                const gamertagWarning = document.getElementById("gamertagWarningParagraph");
+                const gamertag = document.getElementById("gamertag");
+                gamertagWarning.classList.remove("hidden");
+                gamertag.style.borderColor = "red"
+            }
+            return;
+        }
+        localStorage.setItem("token", res.token);
+        window.location.href = "../home/home.html";
     })
 }
 
 
 const postData = async (url,data)=>{
     const response = await fetch(url, {
-        method:"POST",
-        headers:{
+        method: "POST",
+        headers: {
             "Content-Type":"application/json",
         },
         body: JSON.stringify(data)
