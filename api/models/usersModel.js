@@ -1,8 +1,10 @@
 const bcrypt = require("bcrypt");
 const { con } = require("../dbConnection");
+const { ValidationError } = require("../classes/errors");
 
 const createUser = (user, cb) => {
     con.query(`SELECT * FROM users WHERE email="${user.email}"`, (err, result)=>{
+        if(err) return cb(err);
         try{
             if(result.length !== 0){
                 throw Error("This email is already used");
@@ -38,6 +40,47 @@ const createUser = (user, cb) => {
     
 }
 
+const validateUser = (user, cb)=>{
+    console.log(user)
+    con.query(`SELECT * FROM users WHERE email = "${user.email}"`, (err, result)=>{
+        if(err) return cb(err);
+        try{
+            if(result.length === 0){
+                throw new ValidationError("Email was not found", "email");
+            }
+            result = result[0];
+            console.log(result);
+            bcrypt.compare(user.password, result.user_password, (err,valid)=>{
+                if(err) return cb(err)
+                try{
+                    if(valid){
+                        cb(null, result);
+                    }else{
+                        throw new ValidationError("Wrong password", "password");
+                    }
+                }
+                catch(err){
+                    return cb(err);
+                }
+            })
+        }
+        catch(err){
+            cb(err);
+        }
+    })
+}
+
+const getUserInfo = (user_id, cb)=>{
+    con.query(`SELECT * FROM users WHERE id = "${user_id}"`, (err,result)=>{
+        if(err) cb(err);
+        delete result[0].user_password;
+        console.log(result[0]);
+        cb(null,result[0]);
+    })
+}
+
 module.exports = {
-    createUser
+    createUser,
+    validateUser,
+    getUserInfo
 }

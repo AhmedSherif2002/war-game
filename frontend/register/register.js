@@ -60,7 +60,6 @@ function submitForm(e){
     })
 }
 
-
 const postData = async (url,data)=>{
     const response = await fetch(url, {
         method: "POST",
@@ -71,3 +70,5 @@ const postData = async (url,data)=>{
     })
     return response;
 }
+
+

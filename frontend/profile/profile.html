@@ -17,25 +17,37 @@
         </div>
     </div>
     <div class="profile-main">
-        <div class="profile m-auto w-4/5 bg-slate-100 py-4 rounded-lg mt-10 hidden">
-            <div class="profile-header border-b-2 pb-1 pl-4 border-stone-400">
-                <div class="text-red-600 text-3xl">ProPlayer9990</div>
+        <div class="profile m-auto w-4/5 bg-slate-100 py-4 rounded-lg mt-10 hidden" id="profile">
+            <div class="profile-header border-b-2 pb-1 pl-4 flex flex-row items-end border-stone-400">
+                <div class="text-red-600 text-3xl" id="playerTag">ProPlayer3339990</div>
+                <span class="text-xs cursor-pointer" onclick="copy(this)">Copy</span>
             </div>
             <div class="flex flex-row justify-between items-center">
-                <div class="content flex flex-row gap-2 p-4">
-                    <div class="flex flex-col text-xl gap-2">
+                <div class="content flex flex-row gap-5 p-4">
+                    <div class="flex flex-col text-2xl gap-2 font-semibold" id="profileLeftCol">
+                        <!-- <span>Name:</span>
                         <span>Rank:</span>
-                        <span>Level:</span>
-                        <span>Score:</span>
+                        <span>Wins:</span>
+                        <span>Loses:</span>
+                        <span>Kills:</span>
+                        <span>Deaths:</span>
                         <span>k/d ratio:</span>
                         <span>w/l ratio:</span>
+                        <span>Games played:</span>
+                        <span>Hours:</span> -->
+
                     </div>
-                    <div class="flex flex-col text-xl gap-2">
+                    <div class="flex flex-col text-2xl gap-2" id="profileRightCol">
+                        <!-- <span>Ahmed Sherif</span>
                         <span>200</span>
-                        <span>200</span>
-                        <span>200</span>
+                        <span>10</span>
+                        <span>100</span>
+                        <span>100</span>
+                        <span>100</span>
                         <span class="text-green-500">1</span>
                         <span class="text-green-500">1</span>
+                        <span>100</span>
+                        <span>100</span> -->
                     </div>
                 </div>
                 <div class="pr-14">
@@ -44,13 +56,15 @@
             </div>
             <div class="flex flex-col w-fit pl-4 gap-2">
                 <button class="bg-white text-green-500 text-xl font-semibold rounded-md px-3 py-1 shadow-md hover:bg-slate-200">Friends</button>
+                <button class="bg-white text-blue-800 text-xl font-semibold rounded-md px-3 py-1 shadow-md hover:bg-slate-200">Recent Games</button>
                 <button class="bg-white text-red-500 text-xl font-semibold rounded-md px-3 py-1 shadow-md hover:bg-slate-200">Account Settings</button>
             </div>
         </div>
-        <div class="not-registered m-auto w-4/5 py-4 rounded-lg mt-10 bg-red-400">
+        <div class="not-registered m-auto w-4/5 py-4 rounded-lg mt-10 bg-red-400" id="notLoggedIn">
             <div class="text-center text-white text-xl ">YOU ARE NOT LOGGED IN, <a class="font-bold" href="../login/login.html">LOGIN</a></div>
         </div>
     </div>
 </body>
 <script src="../globalHeader.js"></script>
+<script src="profile.js"></script>
 </html>

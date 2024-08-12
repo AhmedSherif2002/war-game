@@ -1,4 +1,4 @@
-const { createUser } = require("../models/usersModel");
+const { createUser,validateUser,getUserInfo } = require("../models/usersModel");
 const jwt = require("jsonwebtoken");
 
 const register = (req,res)=>{
@@ -23,6 +23,47 @@ const register = (req,res)=>{
     })
 }
 
+const login = (req, res)=>{
+    const user = req.body;
+    validateUser(user, (err, results)=>{
+        if(err){
+            console.log(err);
+            res.status(401).json({
+                success: 0,
+                message: "Invalid email or password"
+            })
+            return;
+        }
+        const token = jwt.sign({ id:results.id }, "secret");
+        console.log("successful",results)
+        res.status(201).json({
+            success: 1,
+            message: "login was successful",
+            token: token
+        })
+    })
+}
+
+const getProfile = (req, res)=>{
+    const user_id = req.id;
+    getUserInfo(user_id, (err, result)=>{
+        console.log(err)
+        if(err){
+            return res.status(401).json({
+                success: 0,
+                message: "database error"
+            })
+        }
+        res.status(201).json({
+            success: 1,
+            profile: result
+        })
+        console.log(result.id)
+    })
+}
+
 module.exports = {
-    register
+    register,
+    login,
+    getProfile
 }
