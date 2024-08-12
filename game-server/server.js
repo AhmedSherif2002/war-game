@@ -44,6 +44,7 @@ const assignTeam = (teamNumber, id)=>{
 
 io.on("connection",(socket)=>{
     // Establish a connection and give the player an id
+    
     console.log("connection established")
     console.log(socket.id)
     players[socket.id] = {}
@@ -79,6 +80,7 @@ io.on("connection",(socket)=>{
     // update player degree
     socket.on("updateDegree", (playerDegree)=>{
         // console.log(playerDegree.degree,playerDegree.id)
+        console.log("pp id",playerDegree["id"]);
         players[playerDegree["id"]].degree = playerDegree.degree;
         socket.broadcast.emit("updatePlayerDegree", {id: playerDegree["id"], degree: playerDegree.degree});
     })

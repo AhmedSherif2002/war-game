@@ -3,7 +3,8 @@ import Map from "./classes/Map.js";
 import BulletsController from "./classes/BulletsController.mjs";
 import Player from "./classes/Player.js";
 
-const socket = io("https://war-game-server.onrender.com");
+// const socket = io("https://war-game-server.onrender.com");
+const socket = io("http://localhost:3000/");
 setTimeout(()=>{
     console.log(socket)
 },1000)
@@ -20,8 +21,15 @@ const respawn = {
     }
 }
 
+socket.on("disconnect", ()=>{
+    console.log("socket disconnected");
+    window.location.reload();
+        
+})
+
 // when the player connects (get the id, send info to the server, retrieve other players data)
 socket.on("playerConnect",(id, team, position)=>{
+    console.log("new")
     console.log(id)
     posX = respawn[team].x
     posY = respawn[team].y
@@ -85,7 +93,6 @@ socket.on("respawn", player=>{
 
 socket.on("playerDisconnected", (disconnectedPlayer)=>{
     delete players[disconnectedPlayer];
-
 })
 
 const canvas = document.getElementById("canvas");
