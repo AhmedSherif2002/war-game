@@ -1,10 +1,10 @@
-const apiUrl = "http://localhost:4000/users/";
+import { postData, usersUrl } from "../global.js"
 
-function submitForm(e){
+const submitForm = (e)=>{
     e.preventDefault();
     const logginData = Object.fromEntries(new FormData(e.target));
     console.log(logginData);
-    postData(`${apiUrl}login`,logginData).then(async res=>{
+    postData(`${usersUrl}login`,logginData).then(async res=>{
         if(res.status === 401){
             const response = await res.json();
             console.log("Invalid information")
@@ -13,7 +13,7 @@ function submitForm(e){
         if(res.status == 201){
             const response = await res.json();
             console.log("successfully logged in");
-            localStorage.getItem("token", response.token);
+            localStorage.setItem("token", response.token);
             console.log(response);
             location.replace("../home/home.html");
         }
@@ -21,13 +21,9 @@ function submitForm(e){
     })
 }
 
-const postData = async (url,data)=>{
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type":"application/json",
-        },
-        body: JSON.stringify(data)
-    })
-    return response;
-}
+// event binding
+// const form = document.getElementById("loginForm");
+// form.addEventListener("submit",submitForm)
+
+// making submitForm funtion a global one.
+window.submitForm = submitForm;

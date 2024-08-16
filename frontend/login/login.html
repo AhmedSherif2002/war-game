@@ -19,7 +19,7 @@
     <!-- <div class=""> -->
     <div class="m-auto bg-slate-100 my-5 w-11/12 lg:w-1/2 rounded-lg py-10 flex flex-col items-center gap-y-5">
         <h3 class="text-center font-bold text-2xl mb-2">LOGIN</h3>
-        <form action="" class="login flex flex-col items-center gap-y-5 w-full h-5/6" onsubmit="submitForm(event)">
+        <form action="" class="login flex flex-col items-center gap-y-5 w-full h-5/6" id="loginForm" onsubmit="submitForm(event)">
             <input class="text-xl w-5/6 rounded-lg p-3 outline-none border-b-2 border-emerald-500" type="email" placeholder="email" name="email">
             <input class="text-xl w-5/6 rounded-lg p-3 outline-none border-b-2 border-emerald-500" type="password" name="password" placeholder="password">
             <input type="submit" class="cursor-pointer text-3xl font-semibold px-14 py-2 rounded-lg border-2 border-emerald-500 
@@ -29,6 +29,6 @@
     </div>
     <!-- </div> -->
 </body>
-<script src="./login.js"></script>
+<script type="module" src="./login.js"></script>
 <script src="../globalHeader.js"></script>
 </html>

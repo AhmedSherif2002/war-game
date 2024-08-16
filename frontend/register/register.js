@@ -1,4 +1,4 @@
-const apiUrl = "http://localhost:4000/users/";
+import { postData, usersUrl } from "../global.js"
 
 function submitForm(e){
     e.preventDefault();
@@ -37,7 +37,7 @@ function submitForm(e){
         pswdWarning.classList.contains("hidden")?"":pswdWarning.classList.add("hidden");
     }
 
-    postData(`${apiUrl}register`,user).then(async response=>{
+    postData(`${usersUrl}register`,user).then(async response=>{
         const res = await response.json();
         console.log(res);
         if(!res.success){
@@ -60,15 +60,6 @@ function submitForm(e){
     })
 }
 
-const postData = async (url,data)=>{
-    const response = await fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type":"application/json",
-        },
-        body: JSON.stringify(data)
-    })
-    return response;
-}
 
+window.submitForm = submitForm
 

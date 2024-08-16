@@ -1,10 +1,12 @@
-const apiUrl = "http://localhost:4000/users/";
+import { getData, usersUrl } from "../global.js";
+
+
 
 window.onload = async ()=>{
     const token = localStorage.getItem("token") || null;
     console.log(token)
     if(!token) return;
-    getData(`${apiUrl}getProfile`, token).then(async response=>{
+    getData(`${usersUrl}getProfile`, token).then(async response=>{
         if(response.status !== 201) return;
         const res = await response.json();
         console.log(res);
@@ -52,21 +54,4 @@ const copy = (copyBtn)=>{
     copyBtn.innerHTML = `&#10003;`
 }
 
-async function getData(url,token=null){
-    if(!token){
-        const response = await fetch(url, {
-            headers: {
-                "Content-Type":"application/json",
-            }
-        })
-        return response;
-    }
-
-    const response = await fetch(url, {
-        headers: {
-            "Content-Type":"application/json",
-            "Authorization": `Bearer ${token}`
-        },
-    })
-    return response;
-}
+window.copy = copy;

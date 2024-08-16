@@ -21,13 +21,13 @@
             <div class="find-match-btn py-2 text-center lg:flex flex-row w-full justify-center items-center hidden">Find Match</div>
             <div class="add-friend-button py-2 text-center flex flex-row w-full justify-center items-center">Add Friend&nbsp;+</div>
             <div class="profile-options py-2 w-full cursor-pointer" onclick="">&nbsp;
-                <div id="profile-span1" class="h-full flex flex-col items-center justify-center"><a class="w-full text-center" href="../profile/profile.html">Profile</a></div>
-                <div id="profile-span2" class="h-full flex flex-col items-center justify-center"><a class="w-full text-center" href="../profile/profile.html">Register</a></div>
+                <div id="profile-span1" class="h-full flex flex-col items-center justify-center"><a class="w-full h-full flex flex-row justify-center items-center text-center" href="../profile/profile.html">Profile</a></div>
+                <div id="profile-span2" class="h-full flex flex-col items-center justify-center"><a class="w-full h-full flex flex-row justify-center items-center text-center" href="../profile/profile.html">Register</a></div>
             </div>
         </div>
         <div class="main-menu flex flex-col rounded-lg gap-y-5 w-full lg:w-1/2 text-3xl">
             <div class="hidden lg:block">Find Match</div>
-            <div class="hidden lg:block">Custom game</div>
+            <div class="hidden lg:block">Private Game</div>
             <div class="hidden lg:block">LAN</div>
             <div class="hidden lg:block">Tutorial</div>
             <div class="lg:block"><a href="../profile/profile.html">Profile</a></div>
@@ -35,7 +35,14 @@
             <div class="lg:block">Dashboard</div>
         </div>
     </div>
+<div class="privategame-dialogue w-1/2 absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-300 rounded-md">
+    <h2 class="bg-emerald-400 text-2xl font-bold text-black text-center rounded-t-md py-2">Private Game</h2>
+    <div class="flex flex-col items-center gap-4 my-5">
+        <button class="text-2xl font-semibold bg-green-600 text-white rounded-md w-2/5 py-2 hover:bg-green-500 hover:text-black" onclick="createRoom()">Create New Room</button>
+        <button class="text-2xl font-semibold bg-green-600 text-white rounded-md w-2/5 py-2 hover:bg-green-500 hover:text-black">Join Existing Room</button>
+    </div>
+</div>
 </body>
-<script src="main.js"></script>
+<script type="module" src="main.js"></script>
 <script src="../globalHeader.js"></script>
 </html>

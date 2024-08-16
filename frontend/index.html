@@ -5,12 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="main.css">
 </head>
 <body>
-    <div class="camera" id="camera">
-        <canvas id="canvas" class="canvas" width="4000" height="4100"></canvas>
+    <div class="game hidden">
+        <div class="camera" id="camera">
+            <canvas id="canvas" class="canvas" width="4000" height="4100"></canvas>
+        </div>
+        <canvas id="minimap" class="minimap" width="250" height="256.25"></canvas>
     </div>
-    <canvas id="minimap" class="minimap" width="250" height="256.25"></canvas>
+    <div class="matchmaking">
+        <div class="head w-full bg-green-600 p-2 flex flex-row" id="header">
+            <button class="text-xl bg-emerald-700 text-white px-3 font-semibold rounded-lg"><a href="">Exit</a></button>
+            <div class="m-auto text-3xl text-white font-semibold">Match Making</div>
+        </div>
+        <div>
+            Match Making
+        </div>
+    </div>
 </body>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script src="app.js" type="module"></script>

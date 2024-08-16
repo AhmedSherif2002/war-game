@@ -21,6 +21,10 @@ const respawn = {
     }
 }
 
+socket.on("connect", ()=>{
+    console.log("connected")
+})
+
 socket.on("disconnect", ()=>{
     console.log("socket disconnected");
     window.location.reload();
