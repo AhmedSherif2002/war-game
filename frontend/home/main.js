@@ -38,6 +38,33 @@ const createRoom = function(){
     })
 }
 
+const joinRoom = ()=>{
+    const token = localStorage.getItem("token") || null
+    if(!token) return;
+    postData(`${roomsUrl}joinRoom`, {room:1}, token).then(async res=>{
+        const response = await res.json();
+        console.log(response);
+        if(response.success){
+            sessionStorage.setItem("room", response.room_number);
+            window.location.href = "../index.html";
+        }
+    })
+}
+
+const openDialogue = (button)=>{
+    console.log(button)
+    if(button.id === "privateGame"){
+        document.getElementById("privategame-dialogue").classList.remove("hidden");
+        const bg = document.getElementById("bg")
+        bg.classList.remove("hidden");
+        bg.addEventListener("click",()=>{
+            document.getElementById("privategame-dialogue").classList.add("hidden");
+            bg.classList.add("hidden");
+        })
+    }
+}
+
 // document.getElementById("createRoomBtn").addEventListener("click",createRoom);
 
 window.createRoom = createRoom;
+window.openDialogue = openDialogue;

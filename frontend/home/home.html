@@ -16,7 +16,7 @@
             <div class="profile flex flex-col justify-center p-2"><a href="../profile/profile.html">Profile</a></div>
         </div>
     </div>
-    <div class="main flex flex-col gap-5 mt-5 mx-3 mb-3">
+    <div class="main flex flex-col gap-5 mt-5 mx-3 mb-3" id="main">
         <div class="primary text-3xl flex flex-row gap-4 w-full lg:w-1/2">
             <div class="find-match-btn py-2 text-center lg:flex flex-row w-full justify-center items-center hidden">Find Match</div>
             <div class="add-friend-button py-2 text-center flex flex-row w-full justify-center items-center">Add Friend&nbsp;+</div>
@@ -27,7 +27,7 @@
         </div>
         <div class="main-menu flex flex-col rounded-lg gap-y-5 w-full lg:w-1/2 text-3xl">
             <div class="hidden lg:block">Find Match</div>
-            <div class="hidden lg:block">Private Game</div>
+            <div class="hidden lg:block" id="privateGame" onclick="openDialogue(this)">Private Game</div>
             <div class="hidden lg:block">LAN</div>
             <div class="hidden lg:block">Tutorial</div>
             <div class="lg:block"><a href="../profile/profile.html">Profile</a></div>
@@ -35,13 +35,29 @@
             <div class="lg:block">Dashboard</div>
         </div>
     </div>
-<div class="privategame-dialogue w-1/2 absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-300 rounded-md">
-    <h2 class="bg-emerald-400 text-2xl font-bold text-black text-center rounded-t-md py-2">Private Game</h2>
-    <div class="flex flex-col items-center gap-4 my-5">
+<div id="privategame-dialogue" class="privategame-dialogue hidden z-50 w-1/2 absolute left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-300 rounded-md">
+    <h2 class="bg-emerald-400  text-2xl font-bold text-black text-center rounded-t-md py-2">Private Game</h2>
+    <div class="flex flex-col items-center gap-4 my-5" id="pg-choices">
         <button class="text-2xl font-semibold bg-green-600 text-white rounded-md w-2/5 py-2 hover:bg-green-500 hover:text-black" onclick="createRoom()">Create New Room</button>
-        <button class="text-2xl font-semibold bg-green-600 text-white rounded-md w-2/5 py-2 hover:bg-green-500 hover:text-black">Join Existing Room</button>
+        OR 
+        <div class="text-2xl font-semibold text-black">Join Existing Room</div>
+        <!-- <button class="text-2xl font-semibold bg-green-600 text-white rounded-md w-2/5 py-2 hover:bg-green-500 hover:text-black">Join Existing Room</button> -->
+        <div class="w-2/5 flex flex-row" id="join-room">
+            <input type="text" placeholder="Enter Room Id" class="outline-none basis-2/3 text-2xl rounded-md p-2 border-2 border-emerald-400">
+            <button class="text-2xl basis-1/3 font-semibold bg-green-600 text-white rounded-md py-2 hover:bg-green-500 hover:text-black" onclick="joinRoom()">join</button>
+        </div>
+        <p class="text-red-500 font-semibold hidden">No such Room-Id was found&#x21;</p>
+    </div>
+    <div class="flex flex-col items-center mb-5" id="">
+        <!-- <h3 class="text-2xl font-semibold">Available Rooms</h3> -->
+        <!-- <div class="bg-white w-1/4 rounded-md" id="roomsAvailable">
+            <div>sss</div>
+            <div>sss</div>
+            <div>sss</div>
+        </div> -->
     </div>
 </div>
+<div class="bg w-full h-full absolute left-0 top-0 bg-slate-100 opacity-40 hidden" id="bg"></div>
 </body>
 <script type="module" src="main.js"></script>
 <script src="../globalHeader.js"></script>

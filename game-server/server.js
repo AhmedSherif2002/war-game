@@ -42,7 +42,7 @@ const assignTeam = (teamNumber, id)=>{
     }
 }
 
-io.on("connection",(socket)=>{
+io.on("connect",(socket)=>{
     // Establish a connection and give the player an id
     
     console.log("connection established")
