@@ -25,6 +25,7 @@ let team1 = []
 let team2 = []
 let playersShot = {};
 let rooms = {};
+let socket_idMap = {};
 
 server.listen(port,()=>{
     console.log("server is running on port", port)
@@ -50,15 +51,18 @@ io.on("connect",(socket)=>{
     // players[socket.id] = {}
     let roomPlayers;
     let currRoom;
-    socket.on("player_information", ({id, gamerTag, room})=>{
+    socket.on("player_information", ({id, gamerTag, rank, room}, cb)=>{
+        if(!room) return;
         // if(players[id]){
         //     console.log(rooms[room]["players"][players[id]["socketId"]])
         //     delete rooms[room]["players"][players[id]["socketId"]];
         // }
+        socket_idMap[socket.id] = id;
         players[id] = {};
         players[id]["room"] = room;
         players[id]["gamerTag"] = gamerTag;
         players[id]["socketId"] = socket.id;
+        players[id]["rank"] = rank;
         currRoom = rooms[room] = rooms[room]?rooms[room]:{};
         currRoom["inGame"] = currRoom["inGame"]?currRoom["inGame"]:false;
         roomPlayers = currRoom["players"] = currRoom["players"]?currRoom["players"]:{};
@@ -66,7 +70,7 @@ io.on("connect",(socket)=>{
         if(roomPlayers[id]){
             roomPlayers[id] = roomPlayers[id];
             roomPlayers[id]["socketId"] = socket.id;
-        }else roomPlayers[id] = { id,gamerTag,room,socketId:socket.id,c:counter};
+        }else roomPlayers[id] = { id,gamerTag,room,socketId:socket.id,c:counter,rank};
         // roomPlayers[id] = roomPlayers[id]?roomPlayers[id] && (roomPlayers[id]["socketId"] = socket.id):{ id,gamerTag,room,socketId:socket.id};
         // roomPlayers[id] = roomPlayers[id]?roomPlayers[id]:{ id,gamerTag,room,socketId:socket.id};
         currRoom["number_of_players"] = Object.keys(currRoom.players).length;
@@ -74,6 +78,30 @@ io.on("connect",(socket)=>{
         console.log("roomPlayers", roomPlayers)
         console.log("rooms",rooms)
         console.log("server players" ,players)
+        socket.join(room)
+        cb(roomPlayers);
+        socket.to(room).emit('newPlayerConnects', roomPlayers[id])
+    })
+
+    socket.on("disconnect", ()=>{
+        const player_id = socket_idMap[socket.id];
+        const player_room = players[player_id].room;
+        console.log(player_id, "has disconnected.");
+        delete players[player_id];
+        delete roomPlayers[player_id];
+        io.to(player_room).emit("playerDisconnected", player_id);
+    })
+
+    socket.on("startGame", ()=>{
+        currRoom["inGame"] = true;
+        let c = 0;
+        for(let player in roomPlayers){
+            console.log(player);
+            roomPlayers[player].team = (c++%2)+1;
+        }
+        console.log(roomPlayers)
+        const room = players[socket_idMap[socket.id]].room;
+        io.to(room).emit("startGame", roomPlayers);
     })
     // console.log(counter)
     // const team = (counter % 2 === 0)?1:2;

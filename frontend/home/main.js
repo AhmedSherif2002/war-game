@@ -39,14 +39,18 @@ const createRoom = function(){
 }
 
 const joinRoom = ()=>{
-    const token = localStorage.getItem("token") || null
+    const token = localStorage.getItem("token") || null;
+    const roomIdEle = document.getElementById("roomId");
+    const roomId = roomIdEle.value;
     if(!token) return;
-    postData(`${roomsUrl}joinRoom`, {room:1}, token).then(async res=>{
+    postData(`${roomsUrl}joinRoom`, { roomId }, token).then(async res=>{
         const response = await res.json();
         console.log(response);
         if(response.success){
             sessionStorage.setItem("room", response.room_number);
             window.location.href = "../index.html";
+        }else{
+            document.getElementById("roomNotFoundWarning").classList.remove("hidden");
         }
     })
 }
@@ -67,4 +71,5 @@ const openDialogue = (button)=>{
 // document.getElementById("createRoomBtn").addEventListener("click",createRoom);
 
 window.createRoom = createRoom;
+window.joinRoom = joinRoom;
 window.openDialogue = openDialogue;

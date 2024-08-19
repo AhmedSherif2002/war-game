@@ -2,7 +2,7 @@ import MainPlayer from "./classes/MainPlayer.js"
 import Map from "./classes/Map.js";
 import BulletsController from "./classes/BulletsController.mjs";
 import Player from "./classes/Player.js";
-import { getData, usersUrl } from "./global.js";
+import { getData, usersUrl, renderPlayers, renderTeams } from "./global.js";
 
 // const socket = io("https://war-game-server.onrender.com");
 const socket = io("http://localhost:3000/");
@@ -33,22 +33,53 @@ socket.on("connect", ()=>{
             profile = res.profile;
             if(res.success){
                 if(room){
-                    socket.emit("player_information", {id:profile.id, gamerTag: profile.ingame_name, room: room}, ()=>{
+                    socket.emit("player_information", {id:profile.id, gamerTag: profile.ingame_name, rank:profile.player_rank, room: room}, (roomPlayers)=>{
                         console.log("room assigned");
+                        players = roomPlayers;
+                        roomPlayers = Object.values(roomPlayers);
+                        console.log(roomPlayers);
+                        renderPlayers(document,players);
                     })
                 }
             }
         })
     }
-    
     console.log("connected")
+})
+
+socket.on("newPlayerConnects", player=>{
+    console.log("new player", player);
+    players[player.id] = player;
+    renderPlayers(document,players);
+    console.log(players)
+})
+
+socket.on("playerDisconnected", (disconnectedPlayer)=>{
+    delete players[disconnectedPlayer];
+    console.log(players);
+    renderPlayers(document,players);
+})
+
+socket.on("startGame", (serverPlayers)=>{
+    const me = serverPlayers[profile.id];
+    posX = respawn[me.team].x
+    posY = respawn[me.team].y
+    canvas.style.transform = `translate(${-(posX-camWidth/2)}px,${-(posY-camHeight/2)}px)`;
+    player1 = new MainPlayer(me.id,me.gamerTag,posX,posY,me.team,canvas,mapObstacles,1,ctx,bulletsController,socket);
+    for(let playerId in serverPlayers){
+        if(playerId === profile.id) continue;
+        const color = serverPlayers[playerId].team === me.team?"#0000ff":"red";
+        const player = new Player(playerId, serverPlayers[playerId].gamerTag,respawn[serverPlayers[playerId].team].x, respawn[serverPlayers[playerId].team].y, 100, serverPlayers[playerId].team, color, ctx)
+        players[playerId] = player;
+    }
+    renderTeams(document,players,me.team,update);
 })
 
 socket.on("disconnect", ()=>{
     console.log("socket disconnected");
-    window.location.reload();
-        
+    window.location.reload();    
 })
+
 
 // when the player connects (get the id, send info to the server, retrieve other players data)
 socket.on("playerConnect",(id, team, position)=>{
@@ -72,13 +103,15 @@ socket.on("playerConnect",(id, team, position)=>{
     });
 })
 
+
+
 // new player connects to the game server
-socket.on("newPlayerConnects", (player)=>{
-    console.log(player.id,player);
-    const color = player.team === player1.team?"#0000ff":"red";
-    const newPlayer = new Player(player.id, player.position.x, player.position.y, 100, player.team, color,ctx)
-    players[player.id] = newPlayer;
-})
+// socket.on("newPlayerConnects", (player)=>{
+//     console.log(player.id,player);
+//     const color = player.team === player1.team?"#0000ff":"red";
+//     const newPlayer = new Player(player.id, player.position.x, player.position.y, 100, player.team, color,ctx)
+//     players[player.id] = newPlayer;
+// })
 
 socket.on("updatePlayerState",(player)=>{ // when any player on the server state changes
     console.log("updating players now")
@@ -114,9 +147,7 @@ socket.on("respawn", player=>{
         respawnHandler()
 })
 
-socket.on("playerDisconnected", (disconnectedPlayer)=>{
-    delete players[disconnectedPlayer];
-})
+
 
 const canvas = document.getElementById("canvas");
 const miniMapCanvas = document.getElementById("minimap")
@@ -536,7 +567,7 @@ const updatePlayers = ()=>{
     // draw the players
     for(let playerID in players){
         if(players[playerID].health === 0) continue;
-        if(playerID === player1.id) continue
+        if(playerID == player1.id) continue
         // players[playerID].darw(ctx)
         players[playerID].update(players[playerID].x,players[playerID].y,players[playerID].health,players[playerID].degree,players[playerID].speed, player1.getPosition(),ctx)
     }
@@ -718,3 +749,9 @@ const deleteChild = (parent, index, targetedChild)=>{
 //     }
 //     }
 // }
+
+
+const startGame = ()=>{
+    socket.emit("startGame");
+}
+window.startGame = startGame;

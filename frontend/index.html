@@ -3,27 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Game</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="main.css">
 </head>
 <body>
-    <div class="game hidden">
+    <div class="game hidden" id="game">
         <div class="camera" id="camera">
             <canvas id="canvas" class="canvas" width="4000" height="4100"></canvas>
         </div>
         <canvas id="minimap" class="minimap" width="250" height="256.25"></canvas>
     </div>
-    <div class="matchmaking">
+    <!-- Match Making Section -->
+    <div class="matchmaking" id="matchmaking">
         <div class="head w-full bg-green-600 p-2 flex flex-row" id="header">
             <button class="text-xl bg-emerald-700 text-white px-3 font-semibold rounded-lg"><a href="">Exit</a></button>
             <div class="m-auto text-3xl text-white font-semibold">Match Making</div>
         </div>
-        <div>
-            Match Making
+        <div class="mt-5 pb-1 w-1/2 bg-emerald-400 m-auto rounded-t-lg" id="room-players">
+            <header class="bg-emerald-700 text-2xl text-white rounded-t-lg font-semibold border-b-2 border-b-slate-100 p-2">
+                Players
+            </header>
+            <div class="" id="players">empty room</div>
+        </div>
+        <div class="flex flex-col justify-between gap-24 items-center w-9/12 m-auto mt-20 hidden" id="teams">
+            <div class="flex flex-row justify-between w-full">
+                <div class="bg-blue-500 text-2xl text-white font-semibold w-1/3 p-2 rounded-lg">
+                    <header class="border-b-2 border-b-slate-200 text-center font-bold text-3xl p-2">Your Team</header>
+                    <div id="friends-team" class="flex flex-col gap-8 py-6 text-3xl">
+                        <div>NOOB1</div>
+                        <div>NOOB1</div>
+                        <div>NOOB1</div>
+                        <div>NOOB1</div>
+                        <div>NOOB1</div>
+                    </div>
+                </div>
+                <div class="bg-red-500 text-2xl text-white font-semibold w-1/3 p-2 rounded-lg">
+                    <header class="border-b-2 border-b-slate-200 text-center font-bold text-3xl p-2">Enemy Team</header>
+                    <div id="enemy-team" class="flex flex-col gap-8 py-6 text-3xl">
+                        <div>NOOB2</div>
+                        <div>NOOB2</div>
+                        <div>NOOB2</div>
+                        <div>NOOB2</div>
+                        <div>NOOB2</div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-3xl font-semibold bg-green-200 p-5 rounded-md">
+                <!-- <div> -->
+                    Game starts in
+                <!-- </div>  -->
+                <span id="game-start-timer">6</span>
+            </div>
+        </div>
+        <div class="w-1/2 m-auto absolute bottom-20 left-1/2 -translate-x-1/2 mt-10 flex flex-col items-center">
+            <button class="text-3xl font-semibold bg-emerald-500 text-white p-5 rounded-xl" id="startGameBtn" onclick="startGame()">Start Game</button>
         </div>
     </div>
 </body>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <script src="app2.js" type="module"></script>
+<!-- <script src="app.js" type="module"></script> -->
+<script src="functions.js" type="module"></script>
 </html>

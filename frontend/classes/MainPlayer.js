@@ -18,7 +18,7 @@ export default class MainPlayer{
     top = 0
     shootingInterval;
     shooting = 0;
-    constructor(id,x,y,team,canvas,obstacles,scale,ctx,bulletsController,socket){
+    constructor(id, gamerTag,x,y,team,canvas,obstacles,scale,ctx,bulletsController,socket){
         this.x = x*scale;
         this.y = y*scale;
         this.id = id
@@ -30,6 +30,7 @@ export default class MainPlayer{
         this.bulletsController = bulletsController
         this.socket = socket
         this.team = team;
+        this.gamerTag = gamerTag
         // this.shoot = 
         this.listenForEvents()
         console.log(canvas.width)

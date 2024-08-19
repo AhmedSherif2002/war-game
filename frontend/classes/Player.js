@@ -364,7 +364,7 @@ export default class Player{
             height: 400
         },
     ]
-    constructor(id,x,y,health,team,color,ctx){
+    constructor(id,gamerTag,x,y,health,team,color,ctx){
         this.id = id;
         this.x = x;
         this.y = y;
@@ -374,6 +374,7 @@ export default class Player{
         this.radius = 30;
         this.color = color;
         this.ctx = ctx
+        this.gamerTag = gamerTag
     }
 
     update(x,y,health,degree,speed, mainPlayerPosition,ctx){

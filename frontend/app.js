@@ -516,6 +516,7 @@ const update = ()=>{
 const updatePlayers = ()=>{
     // draw the players
     for(let playerID in players){
+        console.log(playerID === player1.id)
         if(players[playerID].health === 0) continue;
         if(playerID === player1.id) continue
         // players[playerID].darw(ctx)

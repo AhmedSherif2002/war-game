@@ -23,7 +23,6 @@ const createUser = (user, cb) => {
                                 err.message = "database error";
                                 return cb(err);
                             }
-                            console.log("user was successfully created");
                             cb(null, results);
                         })
                     }) 
@@ -41,7 +40,6 @@ const createUser = (user, cb) => {
 }
 
 const validateUser = (user, cb)=>{
-    console.log(user)
     con.query(`SELECT * FROM users WHERE email = "${user.email}"`, (err, result)=>{
         if(err) return cb(err);
         try{
@@ -49,7 +47,6 @@ const validateUser = (user, cb)=>{
                 throw new ValidationError("Email was not found", "email");
             }
             result = result[0];
-            console.log(result);
             bcrypt.compare(user.password, result.user_password, (err,valid)=>{
                 if(err) return cb(err)
                 try{
@@ -74,7 +71,6 @@ const getUserInfo = (user_id, cb)=>{
     con.query(`SELECT * FROM users WHERE id = "${user_id}"`, (err,result)=>{
         if(err) cb(err);
         delete result[0].user_password;
-        console.log(result[0]);
         cb(null,result[0]);
     })
 }
