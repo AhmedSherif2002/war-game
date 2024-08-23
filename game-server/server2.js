@@ -26,6 +26,16 @@ let team2 = []
 let playersShot = {};
 let rooms = {};
 let socket_idMap = {};
+const respawnPosition = {
+    1:{
+        x: 50,
+        y: 50,
+    },
+    2:{
+        x: 100,
+        y: 50
+    }
+}
 
 server.listen(port,()=>{
     console.log("server is running on port", port)
@@ -51,8 +61,18 @@ io.on("connect",(socket)=>{
     // players[socket.id] = {}
     let roomPlayers;
     let currRoom;
+    socket.on("askForRoomJoin", ({ room }, cb)=>{
+        console.log("ask")
+        console.log("room", rooms[room]);
+        if(rooms[room]){
+            if(rooms[room]["inGame"]){
+                cb(false)
+            }else cb(true)
+        }else cb(true);
+    })
     socket.on("player_information", ({id, gamerTag, rank, room}, cb)=>{
         if(!room) return;
+        
         // if(players[id]){
         //     console.log(rooms[room]["players"][players[id]["socketId"]])
         //     delete rooms[room]["players"][players[id]["socketId"]];
@@ -85,11 +105,11 @@ io.on("connect",(socket)=>{
 
     socket.on("disconnect", ()=>{
         const player_id = socket_idMap[socket.id];
-        const player_room = players[player_id].room;
+        const room = players[player_id].room;
         console.log(player_id, "has disconnected.");
         delete players[player_id];
         delete roomPlayers[player_id];
-        io.to(player_room).emit("playerDisconnected", player_id);
+        io.to(room).emit("playerDisconnected", player_id);
     })
 
     socket.on("startGame", ()=>{
@@ -98,6 +118,8 @@ io.on("connect",(socket)=>{
         for(let player in roomPlayers){
             console.log(player);
             roomPlayers[player].team = (c++%2)+1;
+            roomPlayers[player].health = 100;
+            roomPlayers[player].position = respawnPosition[(c%2)+1];
         }
         console.log(roomPlayers)
         const room = players[socket_idMap[socket.id]].room;
@@ -125,51 +147,51 @@ io.on("connect",(socket)=>{
     //     console.log(players)
     //     // checkMemUsage();
     // })
-    // // update player position
-    // socket.on("updateLocation", (playerLocation)=>{
-    //     // console.log("player has moved")
-    //     players[playerLocation["id"]].position = playerLocation.position;
-    //     socket.broadcast.emit("updatePlayerState", {id: playerLocation["id"], position: playerLocation.position});
-    // })
-    // // update player degree
-    // socket.on("updateDegree", (playerDegree)=>{
-    //     // console.log(playerDegree.degree,playerDegree.id)
-    //     console.log("pp id",playerDegree["id"]);
-    //     players[playerDegree["id"]].degree = playerDegree.degree;
-    //     socket.broadcast.emit("updatePlayerDegree", {id: playerDegree["id"], degree: playerDegree.degree});
-    // })
+    // update player position
+    socket.on("updateLocation", (playerLocation)=>{
+        // console.log("player has moved")
+        players[playerLocation["id"]].position = playerLocation.position;
+        roomPlayers[playerLocation["id"]].position = playerLocation.position;
+        const room = players[socket_idMap[socket.id]].room;
+        socket.to(room).emit("updatePlayerState", {id: playerLocation["id"], position: playerLocation.position});
+    })
+    // update player degree
+    socket.on("updateDegree", (playerDegree)=>{
+        // console.log(playerDegree.degree,playerDegree.id)
+        console.log("pp id",playerDegree["id"]);
+        players[playerDegree["id"]].degree = playerDegree.degree;
+        roomPlayers[playerDegree["id"]].degree = playerDegree.degree;
+        const room = players[socket_idMap[socket.id]].room;
+        socket.to(room).emit("updatePlayerDegree", {id: playerDegree["id"], degree: playerDegree.degree});
+    })
     // // Send players to the frontend
     // socket.on("requestPlayers",(cb)=>{
     //     cb(players)
     // })
 
-    // // player shoots
-    // socket.on("shoot",({x,y,m,c,degree})=>{
-    //     const shooter = socket.id
-    //     let playersHit = shoot(x, y, m, c, degree, players,shooter);
-    //     for(let player of playersHit){
-    //         if(players[player].health > 0){
-    //             players[player].health -= 5;
-    //             playersShot[player][shooter] = playersShot[player][shooter]?playersShot[player][shooter]+5:5;
-    //         }
-    //         if(players[player].health === 0){
-    //             playersShot[player] = {};
-    //             io.emit("playerKilled", shooter, player);
-    //             setTimeout(()=>respawn(player),3000);
-    //         }
-    //     }
-    //     // console.log("Players shot ",playersShot)
-    // })
-
-    // // when player disconnects
-    // socket.on("disconnect",()=>{
-    //     console.log("disconnected")
-    //     if(players[socket.id].team === 1) team1.splice(team1.indexOf(socket.id),1);
-    //     else team2.splice(team2.indexOf(socket.id),1);
-    //     delete players[socket.id];
-    //     io.emit("playerDisconnected", socket.id);
-    //     // checkMemUsage();
-    // })
+    // player shoots
+    socket.on("shoot",({x,y,m,c,degree})=>{
+        const shooter = socket_idMap[socket.id]
+        console.log("shooter",roomPlayers[shooter])
+        let playersHit = shoot(x, y, m, c, degree, roomPlayers,shooter);
+        for(let player of playersHit){
+            if(roomPlayers[player].health > 0){
+                roomPlayers[player].health -= 5;
+                console.log("playersHit",playersHit)
+                console.log("player Hit",player)
+                playersShot[player] = {};
+                playersShot[player][shooter] = playersShot[player][shooter]?playersShot[player][shooter]+5:5;
+            }
+            if(roomPlayers[player].health === 0){
+                playersShot[player] = {};
+                const room = players[player].room;
+                io.to(room).emit("playerKilled", shooter, player);
+                player[shooter] = roomPlayers[shooter].kills += 1;
+                player[player] = roomPlayers[player].deaths += 1;
+                setTimeout(()=>respawn(roomPlayers,player),3000);
+            }
+        }
+    })
 })
 
 
@@ -181,10 +203,13 @@ app.get("/",(req,res)=>{
 //     process.exit();
 // },5000)
 
-const respawn = (player)=>{
+const respawn = (roomPlayers,player)=>{
     console.log(player)
     players[player].health = 100;
-    io.emit("respawn" ,player);
+    roomPlayers[player].health = 100;
+    const room = players[player].room;
+    console.log(player)
+    io.to(room).emit("respawn" ,player);
 }
 
 const checkMemUsage = ()=>{

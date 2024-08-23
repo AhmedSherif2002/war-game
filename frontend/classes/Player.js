@@ -364,6 +364,9 @@ export default class Player{
             height: 400
         },
     ]
+    kills = 0;
+    deaths = 0;
+    score = 0;
     constructor(id,gamerTag,x,y,health,team,color,ctx){
         this.id = id;
         this.x = x;

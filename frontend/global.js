@@ -70,41 +70,8 @@ const renderPlayers = (document,players)=>{
     console.log(playersDiv);
 }
 
-const renderTeams = (document,players, team, update) =>{
-    const room = document.getElementById("room-players");
-    const startBtn = document.getElementById("startGameBtn"); 
-    const teams = document.getElementById("teams");
-    const friendsTeam = document.getElementById("friends-team") 
-    const enemyTeam = document.getElementById("enemy-team");
-    const timer = document.getElementById("game-start-timer"); 
-    const matchmaking = document.getElementById("matchmaking");
-    const game = document.getElementById("game");
-    let c = 2;
-    room.classList.add("hidden");
-    startBtn.classList.add("hidden");
-    teams.classList.remove("hidden");
-    let friends = ``;
-    let enemies = ``;
-    for(let player_id in players){
-        console.log(player_id);
-        console.log(players[player_id]);
 
-        if(players[player_id].team === team){
-            friends += `<div>${players[player_id].gamerTag}</div>`;
-        }else enemies += `<div>${players[player_id].gamerTag}</div>`;
-    }
-    friendsTeam.innerHTML = friends;
-    enemyTeam.innerHTML = enemies;
-    const counter = setInterval(()=>{
-        timer.innerHTML = `${--c}`;
-        if(c === 0){
-            clearInterval(counter);
-            matchmaking.classList.add("hidden")
-            game.classList.remove("hidden")
-            update();
-        }
-    },1000);
-}
+
 
 export {
     usersUrl,
@@ -112,5 +79,4 @@ export {
     getData,
     postData,
     renderPlayers,
-    renderTeams
 }

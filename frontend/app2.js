@@ -2,7 +2,7 @@ import MainPlayer from "./classes/MainPlayer.js"
 import Map from "./classes/Map.js";
 import BulletsController from "./classes/BulletsController.mjs";
 import Player from "./classes/Player.js";
-import { getData, usersUrl, renderPlayers, renderTeams } from "./global.js";
+import { getData, usersUrl, renderPlayers } from "./global.js";
 
 // const socket = io("https://war-game-server.onrender.com");
 const socket = io("http://localhost:3000/");
@@ -12,6 +12,10 @@ setTimeout(()=>{
 let profile;
 let player1;
 let players = {}
+let score = {
+    "friendly-team":0,
+    "enemy-team":0
+}
 const respawn = {
     1:{
         x: 50,
@@ -19,7 +23,7 @@ const respawn = {
     },
     2:{
         x: 100,
-        y: 4000
+        y: 50
     }
 }
 
@@ -33,18 +37,28 @@ socket.on("connect", ()=>{
             profile = res.profile;
             if(res.success){
                 if(room){
-                    socket.emit("player_information", {id:profile.id, gamerTag: profile.ingame_name, rank:profile.player_rank, room: room}, (roomPlayers)=>{
-                        console.log("room assigned");
-                        players = roomPlayers;
-                        roomPlayers = Object.values(roomPlayers);
-                        console.log(roomPlayers);
-                        renderPlayers(document,players);
-                    })
+                    // socket.emit("askForRoomJoin", {room},(open)=>{
+                        // if(open){
+                            socket.emit("player_information", {id:profile.id, gamerTag: profile.ingame_name, rank:profile.player_rank, room: room}, (roomPlayers)=>{
+                                console.log("room assigned");
+                                players = roomPlayers;
+                                roomPlayers = Object.values(roomPlayers);
+                                console.log(roomPlayers);
+                                renderPlayers(document,players);
+                                console.log("connected")
+                            })
+                        // }else{
+                            // console.log("This room is already in game");
+                            // alert("Cant't join this room.")
+                            // window.location.href = "./home/home.html";
+                            // return
+                        // }
+                    // })
                 }
             }
         })
     }
-    console.log("connected")
+    
 })
 
 socket.on("newPlayerConnects", player=>{
@@ -61,6 +75,7 @@ socket.on("playerDisconnected", (disconnectedPlayer)=>{
 })
 
 socket.on("startGame", (serverPlayers)=>{
+    console.log("starting...")
     const me = serverPlayers[profile.id];
     posX = respawn[me.team].x
     posY = respawn[me.team].y
@@ -73,37 +88,13 @@ socket.on("startGame", (serverPlayers)=>{
         players[playerId] = player;
     }
     renderTeams(document,players,me.team,update);
+    updateScoreBoard();
 })
 
 socket.on("disconnect", ()=>{
     console.log("socket disconnected");
     window.location.reload();    
 })
-
-
-// when the player connects (get the id, send info to the server, retrieve other players data)
-socket.on("playerConnect",(id, team, position)=>{
-    console.log("new")
-    console.log(id)
-    posX = respawn[team].x
-    posY = respawn[team].y
-    // Adjust the Camera to be at the spawn place
-    canvas.style.transform = `translate(${-(posX-camWidth/2)}px,${-(posY-camHeight/2)}px)`;
-    player1 = new MainPlayer(id,posX,posY,team,canvas,mapObstacles,1,ctx,bulletsController,socket)
-    update()
-    socket.emit("info", {id: id, name: "player 1", position: {x: posX, y: posY}}, (serverPlayers)=>{
-        console.log("new player");
-        // clearInterval(updatePlayersInt)
-        for(let playerId in serverPlayers){
-            const color = serverPlayers[playerId].team === team?"#0000ff":"red";
-            const player = new Player(playerId, serverPlayers[playerId].position.x, serverPlayers[playerId].position.y, 100, serverPlayers[playerId].team, color, ctx)
-            players[playerId] = player;
-        }
-        console.log(players)
-    });
-})
-
-
 
 // new player connects to the game server
 // socket.on("newPlayerConnects", (player)=>{
@@ -127,23 +118,28 @@ socket.on("updatePlayerDegree",(player)=>{ // when any player on the server stat
 socket.on("playerKilled", (shooter, killedPlayer)=>{ // when a player is killed
     players[killedPlayer].health = 0;
     players[killedPlayer].killed = true;
-    if(killedPlayer === player1.id){
+    players[shooter].kills += 1;
+    players[shooter].score += 10;
+    players[killedPlayer].deaths += 1;
+    updateScoreBoard();
+    if(killedPlayer == player1.id){
         // alert("You are killed by " + shooter);
         ctx.clearRect(0,0,width*1,height*1);
         killed = true
         killHandler(shooter)
     }
-    if(shooter === player1.id){
+    if(shooter == player1.id){
         console.log("you killed", killedPlayer);
     }
     console.log(shooter, killedPlayer)
+    updateScore(players[shooter],players[killedPlayer]);
 })
 
 socket.on("respawn", player=>{
     players[player].health = 100;
     players[player].killed = false;
     players[player].position = respawn[players[player].team];
-    if(player === player1.id)
+    if(player == player1.id)
         respawnHandler()
 })
 
@@ -624,134 +620,176 @@ const deleteChild = (parent, index, targetedChild)=>{
     return deleteChild(parent, index+1, targetedChild);
 }
 
-// const render = ()=>{ // to render the map    
-//     // Make the map divs
-//     for(let i=0;i<mapObstacles.length;i++){
-//         ctx.fillStyle = "yellow";
-//         ctx.fillStyle = "#554840";
-//         ctx.fillStyle = "#98a163";
-//         ctx.globalAlpha = mapObstacles[i].alpha || 1
-//         ctx.shadowColor = "rgb(100,100,100)";
-//         ctx.shadowColor = "#696969";
-//         ctx.shadowOffsetX = 10;
-//         ctx.shadowOffsetY = 10;
-//         ctx.fillRect(mapObstacles[i].x,mapObstacles[i].y,mapObstacles[i].width,mapObstacles[i].height)
-//     }
-//     // Make map elements
-//     for(let i=0;i<mapElements.length;i++){
-//         ctx.shadowOffsetX = 0
-//         ctx.shadowOffsetY = 0
-//         ctx.globalAlpha = 1
-//         if(mapElements[i].shape === "circle"){
-//             ctx.fillStyle = mapElements[i].color;
-//             ctx.beginPath()
-//             ctx.arc(mapElements[i].x,mapElements[i].y,mapElements[i].radius,0,2 * Math.PI);
-//             ctx.fill()
-//             let repeatValue = mapElements[i].repeat;
-//             while(repeatValue !== 0){
-//                 console.log(mapElements[i].repeat)
-//                 if(mapElements[i].repeatDir === "x"){
-//                     ctx.arc(mapElements[i].x,mapElements[i].y,mapElements[i].radius,0,2 * Math.PI);
-//                     ctx.fill()
-//                 }else{
-//                     ctx.arc(mapElements[i].x,mapElements[i].y,mapElements[i].radius,0,2 * Math.PI);
-//                     ctx.fill()
-//                 }
-//                 repeatValue--;
-//             }
-//         }else if(mapElements[i].shape === "rectangle"){
-//             ctx.fillStyle = mapElements[i].color;
-//             ctx.fillRect(mapElements[i].x,mapElements[i].y,mapElements[i].width,mapElements[i].height);
-//             let repeatValue = mapElements[i].repeat;
-//             while(repeatValue !== 0){
-//                 ctx.fillStyle = mapElements[i].color;
-//                 if(mapElements[i].repeatDir === "x"){
-//                     ctx.fillRect(mapElements[i].x+(mapElements[i].width+mapElements[i].distance)*repeatValue,mapElements[i].y,mapElements[i].width,mapElements[i].height)
-//                 }else{
-//                     ctx.fillRect(mapElements[i].x,mapElements[i].y+(mapElements[i].height+mapElements[i].distance)*repeatValue,mapElements[i].width,mapElements[i].height)
-//                 }
-//                 repeatValue--;
-//             }
-//         }
-//         else{
-//             ctx.strokeStyle = mapElements[i].color;
-//             ctx.lineWidth = "10"
-//             ctx.beginPath();
-//             ctx.arc(mapElements[i].x, mapElements[i].y, mapElements[i].radius, 0, 2*Math.PI)
-//             ctx.stroke();
-//             let repeatValue = mapElements[i].repeat;
-//             while(repeatValue !== 0){
-//                 console.log(mapElements[i].repeat)
-//                 if(mapElements[i].repeatDir === "x"){
-//                     // ctx.fillRect(mapElements[i].x+(mapElements[i].width+mapElements[i].distance)*repeatValue,mapElements[i].y,mapElements[i].width,mapElements[i].height)
-//                 }else{
-//                     // ctx.fillRect(mapElements[i].x,mapElements[i].y+(mapElements[i].height+mapElements[i].distance)*repeatValue,mapElements[i].width,mapElements[i].height)
-//                 }
-//                 repeatValue--;
-//             }
-//         }
-//     }
-//     // Make the player
-//     // playerCtx.fillStyle = "red"
-//     // playerCtx.beginPath()
-//     // playerCtx.arc(posX,posY,playerRadius,0,2 * Math.PI);
-//     // playerCtx.fill()
-//     // playerCtx.closePath()
-
-//     // Add Images
-//     ctx.drawImage(fighterImage,3200,150,270,210)
-//     ctx.drawImage(fighterImage,2950,150,270,210)
-//     ctx.drawImage(tank,2740,3650,240,180)
-//     ctx.drawImage(tank,2140,3650,240,180)
-
-//     // Add tergeting line
-//     // rifleCtx.save()
-//     // rifleCtx.beginPath()
-//     // rifleCtx.translate(posX, posY);
-//     // rifleCtx.strokeStyle = "rgb(158,154,117)"
-//     // rifleCtx.strokeStyle = "#70899D"
-//     // rifleCtx.strokeStyle = "#3E372C"
-//     // // rifleCtx.strokeStyle = "red"
-//     // // rifleCtx.setLineDash([10]);
-//     // // rifleCtx.setLine();
-//     // rifleCtx.lineWidth = 10
-//     // rifleCtx.rotate(degree)
-//     // rifleCtx.moveTo(0, 0);
-//     // rifleCtx.lineTo(80, 0);
-//     // rifleCtx.stroke()
-//     // rifleCtx.restore()
-
-//     // aiming
-//     if(aim){
-//         console.log("Aiming")
-//         rifleCtx.save()
-//         rifleCtx.beginPath()
-//         rifleCtx.translate(posX, posY);
-//         // rifleCtx.strokeStyle = "rgb(158,154,117)"
-//         rifleCtx.strokeStyle = "#AF9B60"
-//         rifleCtx.setLineDash([10]);
-//         rifleCtx.lineWidth = 2
-//         rifleCtx.rotate(degree)
-//         rifleCtx.moveTo(80, 0);
-//         rifleCtx.lineTo(1000, 0);
-//         rifleCtx.stroke()
-//         rifleCtx.restore()
-//     }
-
-//     // Shooting
-//     if(shoot){
-//     for(let bullet of bullets){
-//         // console.log(bullet)
-//         ctx.beginPath()
-//         ctx.fillStyle = "yellow"
-//         ctx.arc(bullet.x, bullet.y, 4, 0, 2 * Math.PI)
-//         ctx.fill()
-//     }
-//     }
-// }
-
-
 const startGame = ()=>{
     socket.emit("startGame");
 }
+
+// const scoreBoard = document.getElementById("")
+const updateScoreBoard = ()=>{
+    const playersArr = Array.from(Object.values(players));
+    let friendlyTeam = [];
+    let enemyTeam = Array();
+    playersArr.forEach(player=>{
+        if(player.team === player1.team) friendlyTeam.push(player);
+        else enemyTeam.push(player);
+    })
+    friendlyTeam.sort((player1,player2)=>{
+        if(player1.score >= player2.score) return -1;
+        else return 1;
+    })
+    enemyTeam.sort((player1,player2)=>{
+        if(player1.score >= player2.score) return -1;
+        else return 1;
+    })
+    const friendlyScore = friendlyTeam.reduce((acc,curr)=>acc+curr.kills,0)
+    const enemyScore = enemyTeam.reduce((acc,curr)=>acc+curr.kills,0)
+    renderScoreBoard(friendlyTeam,enemyTeam,friendlyScore,enemyScore);
+}
+
+const friendsScore = document.getElementById("friends-score")
+const friendsScoreDiv = document.getElementById("friends-score-div")
+const enemiesScore = document.getElementById("enemies-score")
+const enemiesScoreDiv = document.getElementById("enemies-score-div")
+
+const updateScore = (killer, killed)=>{
+    if(killer.team === player1.team){
+        // score["friendly-team"] += 1;
+        friendsScore.innerHTML = `${++score["friendly-team"]}`;
+        console.log(+score["friendly-team"]/100);
+        friendsScoreDiv.style.width = `${+score["friendly-team"]/50*100}%`;
+        friendsScoreDiv.classList.remove('bg-transparent');
+        friendsScoreDiv.classList.add('bg-blue-700');
+    }else{
+        enemiesScore.innerHTML = `${++score["enemy-team"]}`;
+        enemiesScoreDiv.style.width = `${score["enemy-team"]/50*100}%`;
+        enemiesScoreDiv.classList.remove('bg-transparent');
+        enemiesScoreDiv.classList.add('bg-red-700');
+    }
+    if(score["friendly-team"] === 50 || score["enemy-team"] === 50) end();
+}
+
+const scoreBoard = document.getElementById("scoreboard");
+
+addEventListener("keydown",(e)=>{
+    console.log(e.key)  
+    if(e.key === 'Shift'){
+        scoreBoard.classList.remove("hidden");
+    }
+})
+
+addEventListener("keyup",(e)=>{
+    if(e.key === "Shift"){
+        scoreBoard.classList.add("hidden");
+    }
+})
+
+const friendlyTeamScoreBoard = document.getElementById("friendly-team-sb");
+const enemyTeamScoreBoard = document.getElementById("enemy-team-sb");
+const friendlyTeamScoreBoardScore = document.getElementById("friendly-team-scoreboard-score")
+const enemyTeamScoreBoardScore = document.getElementById("enemy-team-scoreboard-score")
+
+const renderScoreBoard = (friends,enemies,friendlyScore,enemyScore)=>{
+    let friendlyTeam = "";
+    let enemyTeam = "";
+    console.log(friends);
+    friends.forEach(player=>{
+        friendlyTeam += `
+            <div class="player-slot flex flex-row text-white w-full">
+                <span class="basis-1/2">${player.gamerTag}</span>
+                <div class="basis-1/2 flex flex-row justify-between">
+                    <div class="text-center w-24">${player.score}</div>
+                    <div class="text-center w-24">${player.kills}</div>
+                    <div class="text-center w-24">${player.deaths}</div>
+                </div>
+            </div>
+        `;
+    })
+    enemies.forEach(player=>{
+        enemyTeam += `
+            <div class="player-slot flex flex-row text-white w-full">
+                <span class="basis-1/2">${player.gamerTag}</span>
+                <div class="basis-1/2 flex flex-row justify-between">
+                    <div class="text-center w-24">${player.score}</div>
+                    <div class="text-center w-24">${player.kills}</div>
+                    <div class="text-center w-24">${player.deaths}</div>
+                </div>
+            </div>
+        `;
+    })
+    friendlyTeamScoreBoard.innerHTML = friendlyTeam;
+    enemyTeamScoreBoard.innerHTML = enemyTeam;
+    friendlyTeamScoreBoardScore.innerHTML = `${friendlyScore}`;
+    enemyTeamScoreBoardScore.innerHTML = `${enemyScore}`;
+}
+
+const minutes = document.getElementById("mins")
+const seconds = document.getElementById("secs")
+let mins = 0;
+let secs = 10;
+const timerFunction = ()=>{
+    minutes.innerHTML = `${mins}`;
+    seconds.innerHTML = secs<=10?`0${--secs}`:`${--secs}`;
+    if(secs === 0){
+        if(mins === 0){
+            clearInterval(gameInterval);
+            end();
+            return
+        }
+        minutes.innerHTML = `${--mins}`;
+        secs = 60;
+    }
+    
+}
+
+let gameInterval;
+
+const end = ()=>{ 
+    if(score["friendly-team"] > score["enemy-team"]){
+        alert("Your Team Wins!")
+    }else if(score["friendly-team"] < score["enemy-team"]){
+        alert("Enemy Team Wins!");
+    }else{
+        alert("Draw");
+    }
+}
+
+const room = document.getElementById("room-players");
+const startBtn = document.getElementById("startGameBtn"); 
+const teams = document.getElementById("teams");
+const friendsTeam = document.getElementById("friends-team") 
+const enemyTeam = document.getElementById("enemy-team");
+const timer = document.getElementById("game-start-timer"); 
+const matchmaking = document.getElementById("matchmaking");
+const game = document.getElementById("game");
+
+const renderTeams = (document,players, team, update) =>{
+    room.classList.add("hidden");
+    startBtn.classList.add("hidden");
+    teams.classList.remove("hidden");
+    let friends = ``;
+    let enemies = ``;
+    for(let player_id in players){
+        console.log(player_id);
+        console.log(players[player_id]);
+
+        if(players[player_id].team === team){
+            friends += `<div>${players[player_id].gamerTag}</div>`;
+        }else enemies += `<div>${players[player_id].gamerTag}</div>`;
+    }
+    friendsTeam.innerHTML = friends;
+    enemyTeam.innerHTML = enemies;
+    let c = 1;
+    const counter = setInterval(()=>{
+        timer.innerHTML = `${--c}`;
+        if(c === 0){
+            clearInterval(counter);
+            matchmaking.classList.add("hidden")
+            game.classList.remove("hidden")
+            gameInterval = setInterval(timerFunction,1000);
+            update();
+        }
+    },1000);
+}
+
+
 window.startGame = startGame;

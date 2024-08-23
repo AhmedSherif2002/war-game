@@ -18,6 +18,9 @@ export default class MainPlayer{
     top = 0
     shootingInterval;
     shooting = 0;
+    kills = 0;
+    deaths = 0;
+    score = 0;
     constructor(id, gamerTag,x,y,team,canvas,obstacles,scale,ctx,bulletsController,socket){
         this.x = x*scale;
         this.y = y*scale;
