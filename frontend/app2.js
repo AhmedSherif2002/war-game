@@ -91,6 +91,27 @@ socket.on("startGame", (serverPlayers)=>{
     updateScoreBoard();
 })
 
+socket.on("startingTimerDecree",(c)=>{
+    const timer = document.getElementById("game-start-timer");
+    timer.innerHTML = `${c}`;
+})
+
+socket.on("begin",()=>{
+    console.log("begin")
+    matchmaking.classList.add("hidden")
+    game.classList.remove("hidden")
+    update();
+})
+
+const minutes = document.getElementById("mins")
+const seconds = document.getElementById("secs")
+socket.on("gameTimerCountDown",(mins,secs)=>{
+    minutes.innerHTML = (mins <= 9)?`0${mins}`:`${mins}`;
+    seconds.innerHTML = (secs <= 9)?`0${secs}`:`${secs}`;
+})
+
+socket.on("end",end);
+
 socket.on("disconnect", ()=>{
     console.log("socket disconnected");
     window.location.reload();    
@@ -722,34 +743,54 @@ const renderScoreBoard = (friends,enemies,friendlyScore,enemyScore)=>{
     enemyTeamScoreBoardScore.innerHTML = `${enemyScore}`;
 }
 
-const minutes = document.getElementById("mins")
-const seconds = document.getElementById("secs")
-let mins = 0;
-let secs = 10;
-const timerFunction = ()=>{
-    minutes.innerHTML = `${mins}`;
-    seconds.innerHTML = secs<=10?`0${--secs}`:`${--secs}`;
-    if(secs === 0){
-        if(mins === 0){
-            clearInterval(gameInterval);
-            end();
-            return
-        }
-        minutes.innerHTML = `${--mins}`;
-        secs = 60;
-    }
-    
-}
-
-let gameInterval;
-
-const end = ()=>{ 
+function end (){ 
+    const gameOver = document.getElementById("game-over");
+    const bg = document.getElementById("bg")
+    const ftBox = document.getElementById("friend-team-score-box");
+    const etBox = document.getElementById("enemy-team-score-box");
+    const goFriendScore = document.getElementById("friend-team-score-go")
+    const goEnemyScore = document.getElementById("enemy-team-score-go")
+    const goMessage = document.getElementById("go-message")
+    const gameoverTeamsScore = document.getElementById("gameover-teams-score");
+    // const gameOverOptions = document.getElementById("gameover-options");
+    bg.classList.remove("hidden")
+    gameOver.classList.remove("hidden");
+    setTimeout(()=>{
+        console.log(goFriendScore,score["friendly-team"])
+        // gameOverOptions.classList.remove("hidden")
+        gameoverTeamsScore.classList.remove("hidden");
+        goFriendScore.innerHTML = `${score["friendly-team"]}`;
+        goEnemyScore.innerHTML = `${score["enemy-team"]}`;
+        ftBox.style.height = `${score["friendly-team"]}%`;
+        etBox.style.height = `${score["enemy-team"]}%`;
+    },1500);
     if(score["friendly-team"] > score["enemy-team"]){
-        alert("Your Team Wins!")
+        goMessage.innerHTML = "Your Team Wins!";
+        goMessage.classList.add("text-blue-500")
+        friendlyTeamScoreBoardScore.innerHTML = `
+            ${score["friendly-team"]}
+            <div class="flex flex-row items-center h-fit">
+                <span class="text-blue-900">Winner</span>
+                <span class="material-symbols-outlined text-blue-900">
+                    military_tech
+                </span>
+            </div>
+        `;
     }else if(score["friendly-team"] < score["enemy-team"]){
-        alert("Enemy Team Wins!");
+        goMessage.innerHTML = "Enemy Team Wins!";
+        goMessage.classList.add("text-red-500")
+        enemyTeamScoreBoardScore.innerHTML = `
+            ${score["enemy-team"]}
+            <div class="flex flex-row items-center h-fit">
+                <span class="text-blue-900">Winner</span>
+                <span class="material-symbols-outlined text-blue-900">
+                    military_tech
+                </span>
+            </div>
+        `;
     }else{
-        alert("Draw");
+        goMessage.innerHTML = "Draw!";
+        goMessage.classList.add("text-black")
     }
 }
 
@@ -757,8 +798,7 @@ const room = document.getElementById("room-players");
 const startBtn = document.getElementById("startGameBtn"); 
 const teams = document.getElementById("teams");
 const friendsTeam = document.getElementById("friends-team") 
-const enemyTeam = document.getElementById("enemy-team");
-const timer = document.getElementById("game-start-timer"); 
+const enemyTeam = document.getElementById("enemy-team"); 
 const matchmaking = document.getElementById("matchmaking");
 const game = document.getElementById("game");
 
@@ -780,13 +820,9 @@ const renderTeams = (document,players, team, update) =>{
     enemyTeam.innerHTML = enemies;
     let c = 1;
     const counter = setInterval(()=>{
-        timer.innerHTML = `${--c}`;
         if(c === 0){
             clearInterval(counter);
-            matchmaking.classList.add("hidden")
-            game.classList.remove("hidden")
-            gameInterval = setInterval(timerFunction,1000);
-            update();
+            
         }
     },1000);
 }

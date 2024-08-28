@@ -124,29 +124,30 @@ io.on("connect",(socket)=>{
         console.log(roomPlayers)
         const room = players[socket_idMap[socket.id]].room;
         io.to(room).emit("startGame", roomPlayers);
+        let counter = 2;
+        const counterInt = setInterval(()=>{
+            io.to(room).emit("startingTimerDecree",--counter);
+            if(counter === 0){
+                clearInterval(counterInt);
+                io.to(room).emit("begin");
+                let mins = 0;
+                let secs = 60;
+                let gameInterval;
+                gameInterval = setInterval(()=>{
+                    io.to(room).emit("gameTimerCountDown", mins, --secs);
+                    if(secs === 0){
+                        if(mins === 0){
+                            clearInterval(gameInterval);
+                            io.to(room).emit("end");
+                            return
+                        }
+                        secs = 60;
+                        mins--;
+                    }
+                },1000);
+            }
+        },1000);
     })
-    // console.log(counter)
-    // const team = (counter % 2 === 0)?1:2;
-    // // const position = respwanBase[team];
-    // // assignTeam(team,socket.id);
-    // players[socket.id].id = counter++;
-    // // io.to(socket.id).emit("playerConnect", socket.id, team) // Send the id back to the player
-    // // recieve player info
-    // socket.on("info",(player, cb)=>{
-    //     console.log(player.id,player.name)
-    //     players[player.id].name = player.name;
-    //     players[player.id].health = player.health =100;
-    //     players[player.id].degree = player.degree = 0;
-    //     players[player.id].position = player.position;
-    //     // players[player.id].team = player.team = 1;
-    //     players[player.id].speed = player.speed = 8;
-    //     cb(players)
-    //     console.log(player)
-    //     player.team = players[player.id].team;
-    //     socket.broadcast.emit("newPlayerConnects", player);
-    //     console.log(players)
-    //     // checkMemUsage();
-    // })
     // update player position
     socket.on("updateLocation", (playerLocation)=>{
         // console.log("player has moved")
@@ -164,11 +165,6 @@ io.on("connect",(socket)=>{
         const room = players[socket_idMap[socket.id]].room;
         socket.to(room).emit("updatePlayerDegree", {id: playerDegree["id"], degree: playerDegree.degree});
     })
-    // // Send players to the frontend
-    // socket.on("requestPlayers",(cb)=>{
-    //     cb(players)
-    // })
-
     // player shoots
     socket.on("shoot",({x,y,m,c,degree})=>{
         const shooter = socket_idMap[socket.id]
