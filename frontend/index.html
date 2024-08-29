@@ -74,20 +74,34 @@
             </div>
         </div>
         <div class="backdrop-blur-sm absolute left-0 top-0 w-full h-full z-20 hidden" id="bg"></div>
-        <div class="absolute z-40 bg-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-1/2
-        text-3xl font-bold flex flex-col justify-center items-center rounded-md gap-2 hidden" id="game-over">
-            <span id="go-message" class=""></span>
-            <div class="flex flex-row w-2/3 h-1/2 justify-around hidden" id="gameover-teams-score">
+        <div class="absolute z-40 bg-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 h-fit
+        text-3xl font-bold flex flex-col justify-center transition-all duration-500 p-10 items-center rounded-md gap-2 hidden" id="game-over">
+            <span id="go-message" class="">DRAW</span>
+            <div class="flex flex-row w-1/2 justify-between h-52" id="gameover-teams-score">
                 <div class=" w-16 text-blue-900 relative flex flex-row justify-center items-center">
                     <span id="friend-team-score-go" class="z-50"></span>
-                    <div id="friend-team-score-box" class="bg-blue-400 absolute bottom-0 w-full duration-1000 ease-out" style="height: 0%;">
+                    <div id="friend-team-score-box" class="bg-blue-400 absolute bottom-0 w-full transition-all ease-out duration-1000" style="height: 0%;">
                         &nbsp;
                     </div>
                 </div>
                 <div class=" w-16 text-red-900 relative flex flex-row justify-center items-center">
                     <span id="enemy-team-score-go" class="z-50"></span>
-                    <div id="enemy-team-score-box" class="bg-red-400 absolute bottom-0 w-full duration-1000 ease-out" style="height: 0%;">
+                    <div id="enemy-team-score-box" class="bg-red-400 absolute bottom-0 w-full transition-all ease-out duration-1000" style="height: 0%;">
                         &nbsp;
+                    </div>
+                </div>
+            </div>
+            <div class="text-xl font-normal flex flex-col bg-slate-100 w-full p-3 rounded-md hidden" id="player-progress">
+                <span class="font-bold mb-2" id="progress-player-name">Player111</span>
+                <div class="">
+                    <div>Score:&nbsp;<span id="progress-score">2000</span></div>
+                    <div>Kills:&nbsp;<span id="progress-kills">10</span></div>
+                    <div>Deaths:&nbsp;<span id="progress-deaths">10</span></div>
+                </div>
+                <div class="flex flex-row justify-center items-center w-full mt-5">
+                    <span id="rank-span" class="text-xl font-bold basis-2/12 text-emerald-900"></span>
+                    <div class="bg-slate-100 rounded-lg relative basis-10/12">&nbsp;
+                        <div id="level-div" class="absolute top-0 left-0 rounded-lg bg-emerald-500">&nbsp;</div>
                     </div>
                 </div>
             </div>

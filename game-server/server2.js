@@ -70,7 +70,7 @@ io.on("connect",(socket)=>{
             }else cb(true)
         }else cb(true);
     })
-    socket.on("player_information", ({id, gamerTag, rank, room}, cb)=>{
+    socket.on("player_information", ({id, gamerTag, rank, room, xp}, cb)=>{
         if(!room) return;
         
         // if(players[id]){
@@ -88,9 +88,9 @@ io.on("connect",(socket)=>{
         roomPlayers = currRoom["players"] = currRoom["players"]?currRoom["players"]:{};
         // roomPlayers[socket.id] = { id,gamerTag,room }
         if(roomPlayers[id]){
-            roomPlayers[id] = roomPlayers[id];
+            // roomPlayers[id] = roomPlayers[id];
             roomPlayers[id]["socketId"] = socket.id;
-        }else roomPlayers[id] = { id,gamerTag,room,socketId:socket.id,c:counter,rank};
+        }else roomPlayers[id] = { id,gamerTag,room,socketId:socket.id,c:counter,rank,xp, kills:0, deaths:0, score:0};
         // roomPlayers[id] = roomPlayers[id]?roomPlayers[id] && (roomPlayers[id]["socketId"] = socket.id):{ id,gamerTag,room,socketId:socket.id};
         // roomPlayers[id] = roomPlayers[id]?roomPlayers[id]:{ id,gamerTag,room,socketId:socket.id};
         currRoom["number_of_players"] = Object.keys(currRoom.players).length;
@@ -124,14 +124,14 @@ io.on("connect",(socket)=>{
         console.log(roomPlayers)
         const room = players[socket_idMap[socket.id]].room;
         io.to(room).emit("startGame", roomPlayers);
-        let counter = 2;
+        let counter = 1;
         const counterInt = setInterval(()=>{
             io.to(room).emit("startingTimerDecree",--counter);
             if(counter === 0){
                 clearInterval(counterInt);
                 io.to(room).emit("begin");
                 let mins = 0;
-                let secs = 60;
+                let secs = 1;
                 let gameInterval;
                 gameInterval = setInterval(()=>{
                     io.to(room).emit("gameTimerCountDown", mins, --secs);
@@ -139,6 +139,7 @@ io.on("connect",(socket)=>{
                         if(mins === 0){
                             clearInterval(gameInterval);
                             io.to(room).emit("end");
+                            end(room,roomPlayers);
                             return
                         }
                         secs = 60;
@@ -183,6 +184,7 @@ io.on("connect",(socket)=>{
                 const room = players[player].room;
                 io.to(room).emit("playerKilled", shooter, player);
                 player[shooter] = roomPlayers[shooter].kills += 1;
+                player[shooter] = roomPlayers[shooter].score += 10;
                 player[player] = roomPlayers[player].deaths += 1;
                 setTimeout(()=>respawn(roomPlayers,player),3000);
             }
@@ -210,4 +212,11 @@ const respawn = (roomPlayers,player)=>{
 
 const checkMemUsage = ()=>{
     console.log(process.memoryUsage());
+}
+
+const end = (room, players)=>{
+    const score = {};
+    console.log("end")
+    console.log("players",players)
+    console.log("room",room)
 }

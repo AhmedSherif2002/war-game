@@ -20,13 +20,14 @@ export default class MainPlayer{
     shooting = 0;
     kills = 0;
     deaths = 0;
-    score = 0;
-    constructor(id, gamerTag,x,y,team,canvas,obstacles,scale,ctx,bulletsController,socket){
+    score = 410;
+    constructor(id, gamerTag,x,y,xp,rank,team,canvas,obstacles,scale,ctx,bulletsController,socket){
         this.x = x*scale;
         this.y = y*scale;
         this.id = id
         this.speed = 8;
         this.radius = 30;
+        this.rank = rank;
         this.canvas = canvas
         this.scale = scale
         this.mapObstacles = obstacles
@@ -34,6 +35,7 @@ export default class MainPlayer{
         this.socket = socket
         this.team = team;
         this.gamerTag = gamerTag
+        this.xp = xp;
         // this.shoot = 
         this.listenForEvents()
         console.log(canvas.width)

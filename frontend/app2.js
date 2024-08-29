@@ -39,7 +39,7 @@ socket.on("connect", ()=>{
                 if(room){
                     // socket.emit("askForRoomJoin", {room},(open)=>{
                         // if(open){
-                            socket.emit("player_information", {id:profile.id, gamerTag: profile.ingame_name, rank:profile.player_rank, room: room}, (roomPlayers)=>{
+                            socket.emit("player_information", {id:profile.id, gamerTag: profile.ingame_name, rank:profile.player_rank, room: room, xp: profile.xp}, (roomPlayers)=>{
                                 console.log("room assigned");
                                 players = roomPlayers;
                                 roomPlayers = Object.values(roomPlayers);
@@ -77,10 +77,11 @@ socket.on("playerDisconnected", (disconnectedPlayer)=>{
 socket.on("startGame", (serverPlayers)=>{
     console.log("starting...")
     const me = serverPlayers[profile.id];
+    console.log("meee",me)
     posX = respawn[me.team].x
     posY = respawn[me.team].y
     canvas.style.transform = `translate(${-(posX-camWidth/2)}px,${-(posY-camHeight/2)}px)`;
-    player1 = new MainPlayer(me.id,me.gamerTag,posX,posY,me.team,canvas,mapObstacles,1,ctx,bulletsController,socket);
+    player1 = new MainPlayer(me.id,me.gamerTag,posX,posY,me.xp,me.rank,me.team,canvas,mapObstacles,1,ctx,bulletsController,socket);
     for(let playerId in serverPlayers){
         if(playerId === profile.id) continue;
         const color = serverPlayers[playerId].team === me.team?"#0000ff":"red";
@@ -752,18 +753,27 @@ function end (){
     const goEnemyScore = document.getElementById("enemy-team-score-go")
     const goMessage = document.getElementById("go-message")
     const gameoverTeamsScore = document.getElementById("gameover-teams-score");
+    const playerProgress = document.getElementById("player-progress");
     // const gameOverOptions = document.getElementById("gameover-options");
     bg.classList.remove("hidden")
     gameOver.classList.remove("hidden");
     setTimeout(()=>{
-        console.log(goFriendScore,score["friendly-team"])
-        // gameOverOptions.classList.remove("hidden")
         gameoverTeamsScore.classList.remove("hidden");
-        goFriendScore.innerHTML = `${score["friendly-team"]}`;
-        goEnemyScore.innerHTML = `${score["enemy-team"]}`;
-        ftBox.style.height = `${score["friendly-team"]}%`;
-        etBox.style.height = `${score["enemy-team"]}%`;
-    },1500);
+        setTimeout(()=>{
+            console.log(goFriendScore,score["friendly-team"])
+            // gameOverOptions.classList.remove("hidden")
+            goFriendScore.innerHTML = `${score["friendly-team"]}`;
+            goEnemyScore.innerHTML = `${score["enemy-team"]}`;
+            // ftBox.style.height = `${score["friendly-team"]}%`;
+            // etBox.style.height = `${score["enemy-team"]}%`;
+            ftBox.style.height = `50%`;
+            etBox.style.height = `100%`;
+            setTimeout(()=>{
+                playerProgress.classList.remove("hidden");
+            },1200);
+        },100);
+    },500)
+    
     if(score["friendly-team"] > score["enemy-team"]){
         goMessage.innerHTML = "Your Team Wins!";
         goMessage.classList.add("text-blue-500")
@@ -792,6 +802,8 @@ function end (){
         goMessage.innerHTML = "Draw!";
         goMessage.classList.add("text-black")
     }
+    console.log("player after end",player1);
+    calculateRank(player1.id, player1.xp, player1.rank, player1.score);
 }
 
 const room = document.getElementById("room-players");
@@ -827,5 +839,39 @@ const renderTeams = (document,players, team, update) =>{
     },1000);
 }
 
+const calculateRank = (id,xp,rank,score)=>{
+    let rem;
+    const levelDiv = document.getElementById("level-div");
+    const rankSpan = document.getElementById("rank-span");
+    levelDiv.style.width = `${xp}%`;
+    rankSpan.innerHTML = `Level ${rank}`;
+    const levelUpInt = setInterval(()=>{
+        levelDiv.style.width = `${xp}%`;
+        rem = 100-xp;
+        if(score === 0){
+            clearInterval(levelUpInt);
+        }
+        setTimeout(()=>{
+            if(score >= rem){ // Level Up
+                // levelDiv.classList.add("transition-all", "duration-1000")
+                levelDiv.style.transition = "all 0.7s";
+                levelDiv.style.width = `100%`;
+                score -= rem;
+                xp = 0;
+                setTimeout(()=>{
+                    rankSpan.innerHTML = `Level ${++rank}`;
+                    levelDiv.style.transition = "none";
+                },710)
+                // levelDiv.classList.remove("transition-all", "duration-1000")
+            }else if(score < rem){
+                // levelDiv.classList.add("transition-all", "duration-1000")
+                levelDiv.style.transition = "all 0.7s";
+                levelDiv.style.width = `${xp+score}%`;
+                xp += score
+                score = 0;
+            }
+        },500);
+    },2300)
+}
 
 window.startGame = startGame;
