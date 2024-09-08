@@ -124,14 +124,14 @@ io.on("connect",(socket)=>{
         console.log(roomPlayers)
         const room = players[socket_idMap[socket.id]].room;
         io.to(room).emit("startGame", roomPlayers);
-        let counter = 1;
+        let counter = 10;
         const counterInt = setInterval(()=>{
             io.to(room).emit("startingTimerDecree",--counter);
             if(counter === 0){
                 clearInterval(counterInt);
                 io.to(room).emit("begin");
-                let mins = 0;
-                let secs = 1;
+                let mins = 10;
+                let secs = 60;
                 let gameInterval;
                 gameInterval = setInterval(()=>{
                     io.to(room).emit("gameTimerCountDown", mins, --secs);
