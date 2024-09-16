@@ -4,6 +4,7 @@ const {join} = require("path")
 const { createServer } = require("http")
 const { Server } = require("socket.io")
 const { shoot } = require("./controller/shootController")
+const { startNewGame, uploadGameStatus } = require("./controllers/gamesController");
 const canvasWidth = 4000;
 const canvasHeight = 4100;
 const app = express();
@@ -50,7 +51,6 @@ const assignTeam = (teamNumber, id)=>{
     }else{
         team2.push(id)
         players[id].team = 2;
-        // players[id].position = respwanBase[2];
     }
 }
 
@@ -58,12 +58,9 @@ io.on("connect",(socket)=>{
     counter++;
     console.log("connection established")
     console.log("socket id:", socket.id)
-    // players[socket.id] = {}
     let roomPlayers;
     let currRoom;
     socket.on("askForRoomJoin", ({ room }, cb)=>{
-        console.log("ask")
-        console.log("room", rooms[room]);
         if(rooms[room]){
             if(rooms[room]["inGame"]){
                 cb(false)
@@ -72,11 +69,6 @@ io.on("connect",(socket)=>{
     })
     socket.on("player_information", ({id, gamerTag, rank, room, xp}, cb)=>{
         if(!room) return;
-        
-        // if(players[id]){
-        //     console.log(rooms[room]["players"][players[id]["socketId"]])
-        //     delete rooms[room]["players"][players[id]["socketId"]];
-        // }
         socket_idMap[socket.id] = id;
         players[id] = {};
         players[id]["room"] = room;
@@ -86,18 +78,10 @@ io.on("connect",(socket)=>{
         currRoom = rooms[room] = rooms[room]?rooms[room]:{};
         currRoom["inGame"] = currRoom["inGame"]?currRoom["inGame"]:false;
         roomPlayers = currRoom["players"] = currRoom["players"]?currRoom["players"]:{};
-        // roomPlayers[socket.id] = { id,gamerTag,room }
         if(roomPlayers[id]){
-            // roomPlayers[id] = roomPlayers[id];
             roomPlayers[id]["socketId"] = socket.id;
-        }else roomPlayers[id] = { id,gamerTag,room,socketId:socket.id,c:counter,rank,xp, kills:0, deaths:0, score:0};
-        // roomPlayers[id] = roomPlayers[id]?roomPlayers[id] && (roomPlayers[id]["socketId"] = socket.id):{ id,gamerTag,room,socketId:socket.id};
-        // roomPlayers[id] = roomPlayers[id]?roomPlayers[id]:{ id,gamerTag,room,socketId:socket.id};
+        }else roomPlayers[id] = { id,gamerTag,room,socketId:socket.id,c:counter,rank,xp, kills:0, deaths:0, kd_ratio:0, score:0};
         currRoom["number_of_players"] = Object.keys(currRoom.players).length;
-        console.log("current room:",currRoom)
-        console.log("roomPlayers", roomPlayers)
-        console.log("rooms",rooms)
-        console.log("server players" ,players)
         socket.join(room)
         cb(roomPlayers);
         socket.to(room).emit('newPlayerConnects', roomPlayers[id])
@@ -112,26 +96,27 @@ io.on("connect",(socket)=>{
         io.to(room).emit("playerDisconnected", player_id);
     })
 
-    socket.on("startGame", ()=>{
+    socket.on("startGame", async ()=>{
+        const room = players[socket_idMap[socket.id]].room;
+        const game_id = await startNewGame(room);
+        currRoom["game_id"] = game_id
         currRoom["inGame"] = true;
+        console.log("current room", currRoom)
         let c = 0;
         for(let player in roomPlayers){
-            console.log(player);
             roomPlayers[player].team = (c++%2)+1;
             roomPlayers[player].health = 100;
             roomPlayers[player].position = respawnPosition[(c%2)+1];
         }
-        console.log(roomPlayers)
-        const room = players[socket_idMap[socket.id]].room;
         io.to(room).emit("startGame", roomPlayers);
-        let counter = 10;
+        let counter = 1;
         const counterInt = setInterval(()=>{
-            io.to(room).emit("startingTimerDecree",--counter);
+            io.to(room).emit("startingTimerDecrease",--counter);
             if(counter === 0){
                 clearInterval(counterInt);
                 io.to(room).emit("begin");
-                let mins = 10;
-                let secs = 60;
+                let mins = 0;
+                let secs = 2;
                 let gameInterval;
                 gameInterval = setInterval(()=>{
                     io.to(room).emit("gameTimerCountDown", mins, --secs);
@@ -139,7 +124,7 @@ io.on("connect",(socket)=>{
                         if(mins === 0){
                             clearInterval(gameInterval);
                             io.to(room).emit("end");
-                            end(room,roomPlayers);
+                            end(currRoom,room,roomPlayers);
                             return
                         }
                         secs = 60;
@@ -151,7 +136,6 @@ io.on("connect",(socket)=>{
     })
     // update player position
     socket.on("updateLocation", (playerLocation)=>{
-        // console.log("player has moved")
         players[playerLocation["id"]].position = playerLocation.position;
         roomPlayers[playerLocation["id"]].position = playerLocation.position;
         const room = players[socket_idMap[socket.id]].room;
@@ -159,8 +143,6 @@ io.on("connect",(socket)=>{
     })
     // update player degree
     socket.on("updateDegree", (playerDegree)=>{
-        // console.log(playerDegree.degree,playerDegree.id)
-        console.log("pp id",playerDegree["id"]);
         players[playerDegree["id"]].degree = playerDegree.degree;
         roomPlayers[playerDegree["id"]].degree = playerDegree.degree;
         const room = players[socket_idMap[socket.id]].room;
@@ -169,23 +151,26 @@ io.on("connect",(socket)=>{
     // player shoots
     socket.on("shoot",({x,y,m,c,degree})=>{
         const shooter = socket_idMap[socket.id]
-        console.log("shooter",roomPlayers[shooter])
         let playersHit = shoot(x, y, m, c, degree, roomPlayers,shooter);
         for(let player of playersHit){
             if(roomPlayers[player].health > 0){
                 roomPlayers[player].health -= 5;
-                console.log("playersHit",playersHit)
-                console.log("player Hit",player)
                 playersShot[player] = {};
                 playersShot[player][shooter] = playersShot[player][shooter]?playersShot[player][shooter]+5:5;
             }
             if(roomPlayers[player].health === 0){
                 playersShot[player] = {};
                 const room = players[player].room;
-                io.to(room).emit("playerKilled", shooter, player);
-                player[shooter] = roomPlayers[shooter].kills += 1;
-                player[shooter] = roomPlayers[shooter].score += 10;
-                player[player] = roomPlayers[player].deaths += 1;
+                // player[shooter] = roomPlayers[shooter].kills += 1;
+                // player[shooter] = roomPlayers[shooter].score += 10;
+                // player[player] = roomPlayers[player].deaths += 1;
+                roomPlayers[shooter].kills += 1;
+                roomPlayers[shooter].score += 10;
+                roomPlayers[shooter].kd_ratio = roomPlayers[shooter].deaths !== 0 ?  roomPlayers[shooter].kills/roomPlayers[shooter].deaths : roomPlayers[shooter].kills;
+                roomPlayers[player].deaths += 1;
+                roomPlayers[player].kd_ratio = roomPlayers[player].deaths !== 0 ?  roomPlayers[player].kills/roomPlayers[player].deaths : roomPlayers[player].kills;
+                console.log("player", player)
+                io.to(room).emit("playerKilled", shooter, player, roomPlayers);
                 setTimeout(()=>respawn(roomPlayers,player),3000);
             }
         }
@@ -202,21 +187,28 @@ app.get("/",(req,res)=>{
 // },5000)
 
 const respawn = (roomPlayers,player)=>{
-    console.log(player)
+    // console.log(player)
     players[player].health = 100;
     roomPlayers[player].health = 100;
     const room = players[player].room;
-    console.log(player)
+    // console.log(player)
     io.to(room).emit("respawn" ,player);
 }
 
-const checkMemUsage = ()=>{
-    console.log(process.memoryUsage());
-}
+const end = (currRoom,room_id, roomPlayers)=>{
+    let score = { team1:0, team2:0 };
+    for(let player_id in roomPlayers){
+        console.log("ppp",roomPlayers[player_id]);
+        if(roomPlayers[player_id].team === 1){
+            score["team1"] += roomPlayers[player_id].score;
+        }else
+        score["team2"] += roomPlayers[player_id].score;
+    }
+    // console.log("end")
+    // console.log("players",players)
+    // console.log("room",room_id)
 
-const end = (room, players)=>{
-    const score = {};
-    console.log("end")
-    console.log("players",players)
-    console.log("room",room)
+    // send game data to the database (api).
+
+    uploadGameStatus(currRoom,room_id,roomPlayers,score);
 }

@@ -92,7 +92,7 @@ socket.on("startGame", (serverPlayers)=>{
     updateScoreBoard();
 })
 
-socket.on("startingTimerDecree",(c)=>{
+socket.on("startingTimerDecrease",(c)=>{
     const timer = document.getElementById("game-start-timer");
     timer.innerHTML = `${c}`;
 })
@@ -137,13 +137,13 @@ socket.on("updatePlayerDegree",(player)=>{ // when any player on the server stat
     players[player.id].degree = player.degree
 })
 
-socket.on("playerKilled", (shooter, killedPlayer)=>{ // when a player is killed
+socket.on("playerKilled", (shooter, killedPlayer, serverPlayers)=>{ // when a player is killed
     players[killedPlayer].health = 0;
     players[killedPlayer].killed = true;
     players[shooter].kills += 1;
     players[shooter].score += 10;
     players[killedPlayer].deaths += 1;
-    updateScoreBoard();
+    updateScoreBoard(serverPlayers);
     if(killedPlayer == player1.id){
         // alert("You are killed by " + shooter);
         ctx.clearRect(0,0,width*1,height*1);
@@ -646,9 +646,9 @@ const startGame = ()=>{
     socket.emit("startGame");
 }
 
-// const scoreBoard = document.getElementById("")
-const updateScoreBoard = ()=>{
-    const playersArr = Array.from(Object.values(players));
+const updateScoreBoard = (serverPlayers)=>{
+    if(!serverPlayers) serverPlayers = players;
+    const playersArr = Array.from(Object.values(serverPlayers));
     let friendlyTeam = [];
     let enemyTeam = Array();
     playersArr.forEach(player=>{

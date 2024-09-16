@@ -396,15 +396,15 @@ const shoot = (x, y, m, c, degree, players, shooter)=>{
 }
 
 const checkIfPlayerIsHit = (xs,xe,ys,ye,m,c,players, shooter)=>{
-    console.log("checking for hit")
+    // console.log("checking for hit")
     let x = players[shooter].position.x;
     let y = players[shooter].position.y;
     let playersHit = [];
     for(let player in players){
-        console.log(players[player].health, player);
+        // console.log(players[player].health, player);
         if(players[player].health === 0) continue;
         if(player === shooter || players[player].team === players[shooter].team){ // no friendly fire
-            console.log("friendly fire");
+            // console.log("friendly fire");
             continue
         }
         // console.log(player,players[player]);
@@ -426,10 +426,10 @@ const checkIfPlayerIsHit = (xs,xe,ys,ye,m,c,players, shooter)=>{
             if((ys <= y1 && y1 <= ye) || (ys <= y2 && y2 <= ye)){
                 let obstacleHit = checkObstaclesInBetween(x,y,xc,yc,m,c);
                 if(!obstacleHit){
-                    console.log("player is hit");
+                    // console.log("player is hit");
                     playersHit.push(player);
                 }else{
-                    console.log("player isn't hit but in the line of fire");
+                    // console.log("player isn't hit but in the line of fire");
                 }
             }
         }
