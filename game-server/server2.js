@@ -115,7 +115,7 @@ io.on("connect",(socket)=>{
             if(counter === 0){
                 clearInterval(counterInt);
                 io.to(room).emit("begin");
-                let mins = 0;
+                let mins = 2;
                 let secs = 2;
                 let gameInterval;
                 gameInterval = setInterval(()=>{
@@ -166,10 +166,13 @@ io.on("connect",(socket)=>{
                 // player[player] = roomPlayers[player].deaths += 1;
                 roomPlayers[shooter].kills += 1;
                 roomPlayers[shooter].score += 10;
+                roomPlayers[shooter].xp += 10;
+                roomPlayers[shooter].rank = parseInt((roomPlayers[shooter].xp)/100) > roomPlayers[shooter].rank ? roomPlayers[shooter].rank+1 : roomPlayers[shooter].rank;
                 roomPlayers[shooter].kd_ratio = roomPlayers[shooter].deaths !== 0 ?  roomPlayers[shooter].kills/roomPlayers[shooter].deaths : roomPlayers[shooter].kills;
                 roomPlayers[player].deaths += 1;
                 roomPlayers[player].kd_ratio = roomPlayers[player].deaths !== 0 ?  roomPlayers[player].kills/roomPlayers[player].deaths : roomPlayers[player].kills;
                 console.log("player", player)
+
                 io.to(room).emit("playerKilled", shooter, player, roomPlayers);
                 setTimeout(()=>respawn(roomPlayers,player),3000);
             }

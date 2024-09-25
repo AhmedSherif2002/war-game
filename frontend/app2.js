@@ -82,6 +82,7 @@ socket.on("startGame", (serverPlayers)=>{
     posY = respawn[me.team].y
     canvas.style.transform = `translate(${-(posX-camWidth/2)}px,${-(posY-camHeight/2)}px)`;
     player1 = new MainPlayer(me.id,me.gamerTag,posX,posY,me.xp,me.rank,me.team,canvas,mapObstacles,1,ctx,bulletsController,socket);
+    player1.initialRank = me.rank;
     for(let playerId in serverPlayers){
         if(playerId === profile.id) continue;
         const color = serverPlayers[playerId].team === me.team?"#0000ff":"red";
@@ -803,7 +804,7 @@ function end (){
         goMessage.classList.add("text-black")
     }
     console.log("player after end",player1);
-    calculateRank(player1.id, player1.xp, player1.rank, player1.score);
+    calculateRank(player1.id, player1.xp, player1.initialRank, player1.score);
 }
 
 const room = document.getElementById("room-players");
