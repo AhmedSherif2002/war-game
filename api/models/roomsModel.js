@@ -15,7 +15,7 @@ const createNewRoom = (adminId, cb)=>{
 
 const join = (player_id, roomId, cb)=>{
     con.query(`SELECT * FROM rooms WHERE room_id=${roomId} AND currently_online=true`,(err, results)=>{
-        if(err) cb(err);
+        if(err) return cb(err);
         // if(!results.length) 
         try{
             if(!results.length) throw Error("Room was not Found");
